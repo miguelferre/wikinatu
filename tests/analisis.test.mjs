@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   ventanaMeses, textoVentana, enTaiwan, centroDe, localeLocal, soloEspecies, nombreVisible, mediana,
-  perfilDe, altitudEn, resumenPerfil, elegirEtiquetas, repartir, pasoKm, pasoAltura, filtrarInventario, recuentoGrupos,
+  perfilDe, altitudEn, resumenPerfil, elegirEtiquetas, repartir, pasoKm, pasoAltura, filtrarInventario, recuentoGrupos, resumenCarga,
 } from '../web/js/analisis.js';
 import { formatoGrados, longitudEscala, pasoGrados } from '../web/js/lamina-marco.js';
 
@@ -129,4 +129,41 @@ test('el perfil prefiere la altitud del GPX a la del modelo', () => {
 test('sin altitud en el GPX, el perfil usa el modelo', () => {
   const puntos = Array.from({ length: 12 }, (_, i) => ({ lat: 42 + i * 0.001, lon: 1, ele: null }));
   assert.ok(perfilDe(puntos, () => 2500).every((p) => p.alt === 2500));
+});
+
+test('la carga enseña el tramo en curso y el relieve va primero', () => {
+  const r = resumenCarga({ relieve: 'cargando', especies: { a: 2, b: 6 }, puntos: { a: 0, b: 6 } });
+  assert.equal(r.activa, true);
+  assert.equal(r.fase, 'relieve');
+  assert.equal(r.etapa, 'especies');
+  assert.deepEqual(r.paso, { a: 3, b: 6 });
+});
+
+test('la barra de carga no retrocede de una fase a otra', () => {
+  const pasos = [
+    { relieve: 'cargando', especies: { a: 0, b: 3 }, puntos: { a: 0, b: 6 }, nombres: { a: 0, b: 3 } },
+    { relieve: 'cargando', especies: { a: 3, b: 3 }, puntos: { a: 0, b: 6 }, nombres: { a: 0, b: 3 } },
+    { relieve: 'listo', especies: { a: 3, b: 3 }, puntos: { a: 0, b: 6 }, nombres: { a: 0, b: 3 } },
+    { relieve: 'listo', especies: { a: 3, b: 3 }, puntos: { a: 1, b: 2 }, nombres: { a: 0, b: 3 } },
+    { relieve: 'listo', especies: { a: 3, b: 3 }, puntos: { a: 2, b: 2 }, nombres: { a: 0, b: 3 } },
+    { relieve: 'listo', especies: { a: 3, b: 3 }, puntos: { a: 2, b: 2 }, nombres: { a: 3, b: 3 } },
+  ];
+  const f = pasos.map((p) => resumenCarga(p).fraccion);
+  for (let i = 1; i < f.length; i++) assert.ok(f[i] >= f[i - 1], `paso ${i}: ${f[i - 1]} a ${f[i]}`);
+  assert.equal(f.at(-1), 1);
+  assert.equal(resumenCarga(pasos.at(-1)).activa, false);
+});
+
+test('sin fases no hay carga ni fracción', () => {
+  const r = resumenCarga({});
+  assert.equal(r.activa, false);
+  assert.equal(r.fase, null);
+  assert.equal(r.fraccion, null);
+});
+
+test('solo el relieve: carga activa sin paso', () => {
+  const r = resumenCarga({ relieve: 'cargando' });
+  assert.equal(r.activa, true);
+  assert.equal(r.paso, null);
+  assert.equal(r.fraccion, 0);
 });

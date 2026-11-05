@@ -131,13 +131,13 @@ export async function contarEspecies(tramos, filtros, locale, alAvanzar, cancela
       pagina += 1;
     }
     hechas += 1;
-    alAvanzar?.(hechas, tramos.length);
+    alAvanzar?.(hechas, tramos.length, total);
   }
   return total;
 }
 
 // Puntos reales de una lista de especies, con sus coordenadas públicas.
-export async function puntosDe(caja, ids, filtros, maxPaginas = 6, cancelado = () => false) {
+export async function puntosDe(caja, ids, filtros, maxPaginas = 6, cancelado = () => false, alAvanzar = null) {
   const puntos = [];
   for (let pagina = 1; pagina <= maxPaginas; pagina++) {
     if (cancelado()) return null;
@@ -151,6 +151,7 @@ export async function puntosDe(caja, ids, filtros, maxPaginas = 6, cancelado = (
       const [lat, lon] = o.location.split(',').map(Number);
       puntos.push({ id: o.id, lat, lon, taxon: o.taxon.id, dia: o.observed_on });
     }
+    alAvanzar?.(pagina, Math.max(1, Math.min(maxPaginas, Math.ceil(d.total_results / 200))));
     if (pagina * 200 >= d.total_results) break;
   }
   return puntos;

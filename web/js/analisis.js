@@ -33,6 +33,30 @@ export function localeLocal(seleccion, centro) {
 // species_counts mezcla géneros y familias cuando nadie afinó más. Solo quedan especies o menos.
 export const soloEspecies = (entradas) => entradas.filter((e) => (e.taxon.rank_level ?? 10) <= 10);
 
+// Una carga: relieve 'cargando'|'listo'|null y tres fases { a, b } de peticiones hechas y previstas.
+// El relieve vale PESO_RELIEVE pasos: no da avance propio. La barra nunca retrocede si
+// una fase ya empezada conserva su { a, b } y solo baja b. Devuelve qué se enseña.
+const PESO_RELIEVE = 2;
+const ETAPAS = ['especies', 'puntos', 'nombres'];
+
+export function resumenCarga({ relieve = null, especies = null, puntos = null, nombres = null } = {}) {
+  const fases = { especies, puntos, nombres };
+  const presentes = ETAPAS.filter((k) => fases[k]);
+  const etapa = presentes.find((k) => fases[k].a < fases[k].b) ?? null;
+  const cargaRelieve = relieve === 'cargando';
+  const peso = relieve ? PESO_RELIEVE : 0;
+  const total = presentes.reduce((s, k) => s + fases[k].b, peso);
+  const hecho = presentes.reduce((s, k) => s + Math.min(fases[k].a, fases[k].b), cargaRelieve ? 0 : peso);
+  return {
+    activa: cargaRelieve || etapa != null,
+    fase: cargaRelieve ? 'relieve' : etapa,
+    etapa,
+    // El tramo en curso, no el último acabado: empieza en «1 de 6».
+    paso: etapa ? { a: fases[etapa].a + 1, b: fases[etapa].b } : null,
+    fraccion: total ? hecho / total : null,
+  };
+}
+
 export const nombreVisible = (f) => f.nombre || f.nombreEn || f.cientifico;
 
 // La atribución de iNaturalist repite al autor: basta con autor y licencia.

@@ -30,9 +30,8 @@ function marchar(dem, g, intervalo, alTramo) {
   }
 }
 
-export function grabarCurvas(canvas, dem, { rampa, escala, unidad, intervalo, cota }) {
+export function grabarCurvas(canvas, dem, { curvas, escala, unidad, intervalo, cota }) {
   const ctx = canvas.getContext('2d');
-  const papel = rampa === 'papel';
   const { W, datos, ax, ay, metrosPx, ancho, alto } = dem;
   const altura = (x, y) => datos[Math.floor(Math.min(alto - 1, Math.max(0, y)) + ay) * W + Math.floor(Math.min(ancho - 1, Math.max(0, x)) + ax)];
   const g = ancho > 1600 ? 2 : 1;
@@ -65,10 +64,10 @@ export function grabarCurvas(canvas, dem, { rampa, escala, unidad, intervalo, co
     rotulos.push({ x, y, a, texto: String(n * intervalo) });
   });
   ctx.lineJoin = 'round';
-  ctx.strokeStyle = papel ? 'rgba(92,70,50,.34)' : 'rgba(246,236,210,.34)';
+  ctx.strokeStyle = curvas.fina;
   ctx.lineWidth = 0.55 * unidad;
   ctx.stroke(finas);
-  ctx.strokeStyle = papel ? 'rgba(80,58,42,.62)' : 'rgba(246,236,210,.62)';
+  ctx.strokeStyle = curvas.maestra;
   ctx.lineWidth = 0.8 * unidad;
   ctx.stroke(maestras);
 
@@ -80,9 +79,9 @@ export function grabarCurvas(canvas, dem, { rampa, escala, unidad, intervalo, co
     ctx.translate(r.x, r.y);
     ctx.rotate(r.a);
     ctx.lineWidth = 3.4 * unidad;
-    ctx.strokeStyle = papel ? 'rgba(240,232,210,.92)' : 'rgba(16,36,38,.86)';
+    ctx.strokeStyle = curvas.halo;
     ctx.strokeText(r.texto, 0, 0);
-    ctx.fillStyle = papel ? '#4a3a2c' : '#f2e6c8';
+    ctx.fillStyle = curvas.cota;
     ctx.fillText(r.texto, 0, 0);
     ctx.restore();
   }

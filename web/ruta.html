@@ -9,8 +9,10 @@
 <link rel="preload" href="fonts/alegreya-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/alegreya-wght-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/temas.css">
 <link rel="stylesheet" href="css/visor.css">
 <link rel="stylesheet" href="css/print.css" media="print">
+<script src="js/tema.js"></script>
 <script type="module" src="js/visor.js"></script>
 </head>
 <body>
@@ -75,7 +77,15 @@
   </section>
 
   <section class="plancha" id="plancha" tabindex="-1" hidden>
-    <div class="plancha-lienzo" id="lienzo"></div>
+    <div class="plancha-lienzo" id="lienzo">
+      <div class="carga" id="carga" aria-hidden="true" hidden>
+        <p class="carga-sup" id="cargaSup"></p>
+        <p class="carga-que" id="cargaQue"></p>
+        <p class="carga-paso" id="cargaPaso"></p>
+        <div class="carga-barra" id="cargaBarra"><span></span></div>
+        <p class="carga-nota" id="cargaNota" data-t="carga_nota"></p>
+      </div>
+    </div>
     <aside class="cartela" id="cartela" data-t-aria="cartela_aria" aria-label="Cartela de la lámina"></aside>
   </section>
 
@@ -84,6 +94,7 @@
       <h2 data-t="cuadro_titulo">Cuadro de la naturaleza</h2>
       <p class="texto" id="cuadroNota"></p>
     </header>
+    <div class="carga-linea" id="cuadroCarga" aria-hidden="true" hidden><p class="carga-linea-texto"></p><div class="carga-barra"><span></span></div></div>
     <div id="cuadro" class="cuadro-caja"></div>
   </section>
 
@@ -100,6 +111,7 @@
       </label>
     </div>
     <p class="sesgo texto" data-t="sesgo"></p>
+    <div class="carga-linea" id="inventarioCarga" aria-hidden="true" hidden><p class="carga-linea-texto"></p><div class="carga-barra"><span></span></div></div>
     <ul class="especies" id="especies"></ul>
     <p class="inventario-fin" id="inventarioFin"></p>
     <button id="btnMas" class="boton" type="button" hidden></button>

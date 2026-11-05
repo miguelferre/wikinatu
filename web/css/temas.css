@@ -1,0 +1,226 @@
+/* Temas de WikiNatu. Este fichero es el único sitio con los colores de lienzo, SVG y guía.
+   :root guarda el aspecto publicado. Un tema se elige con ?tema=nombre (js/tema.js) y solo
+   redefine lo que cambia: el resto deriva de los tokens de base.css.
+   --lam-* lámina en pantalla, --gui-* lámina de la guía, --cua-* cuadro en pantalla,
+   --cug-* cuadro de la guía, --heroe-* portada, --p-* páginas impresas. */
+
+:root {
+  --oro-2: #f4e2a8;
+  --velo: rgb(5 14 18 / .78);
+
+  /* Rampas de relieve, de bajo a alto. */
+  --rampa-noche: #16343a, #20474a, #2f5c54, #4a7059, #74835c, #9c9460, #bba670, #d0bb8e, #e4d6b4;
+  --rampa-papel: #e4ece5, #d9e5d9, #cfdec8, #dbdfb8, #e7dfb0, #e6d29e, #dcbf8a, #cfab7e, #c29f82;
+  --rampa-heroe: #08181f, #0d2b33, #134348, #1f5f57, #3f7f5f, #8a9a5a, #cfa94f, #ecd38a, #f7ecd2;
+  --rampa-heroe-fondo: #061217, #08171c, #0a1b21, #0b1e25, #0c2128, #0e242c, #0f2730, #112a33, #122d37;
+
+  /* Lámina en pantalla. claro: 1 cambia sombreado, grano y viñeta a los de papel. */
+  --lam-claro: 0;
+  --lam-fondo: var(--noche);
+  --lam-tinta: var(--fg);
+  --lam-suave: var(--muted);
+  --lam-halo: rgba(7,20,26,.82);
+  --lam-casing: #07161c;
+  --lam-anillo: #f6efdf;
+  --lam-blanco: var(--fg);
+  --lam-ruta: var(--ruta);
+  --clave-ruta: transparent;
+  --lam-vacio: #10262e;
+  --lam-mar-fondo: #091c25;
+  --lam-mar-fondo2: #0d2831;
+  --lam-mar-linea: #7aa4a4;
+  --lam-curva-fina: rgba(246,236,210,.34);
+  --lam-curva-maestra: rgba(246,236,210,.62);
+  --lam-curva-halo: rgba(16,36,38,.86);
+  --lam-curva-cota: #f2e6c8;
+
+  /* Lámina de la guía. */
+  --gui-claro: 1;
+  --gui-fondo: #fdfbf5;
+  --gui-tinta: #26363a;
+  --gui-suave: #55666a;
+  --gui-halo: rgba(253,251,245,.88);
+  --gui-casing: #fdfbf5;
+  --gui-anillo: #ffffff;
+  --gui-blanco: #fdfbf5;
+  --gui-ruta: #c8341a;
+  --gui-vacio: #eef0e8;
+  --gui-mar-fondo: #e2ecea;
+  --gui-mar-fondo2: #d6e4e2;
+  --gui-mar-linea: #567a80;
+  --gui-curva-fina: rgba(92,70,50,.34);
+  --gui-curva-maestra: rgba(80,58,42,.62);
+  --gui-curva-halo: rgba(240,232,210,.92);
+  --gui-curva-cota: #4a3a2c;
+
+  /* Cuadro en pantalla y en la guía. */
+  --cua-fondo: var(--noche);
+  --cua-tinta: var(--fg);
+  --cua-suave: var(--muted);
+  --cua-cielo: var(--linea);
+  --cua-sombra: #061318;
+  --cua-anillo: var(--lam-anillo);
+  --cug-fondo: #ffffff;
+  --cug-tinta: #26363a;
+  --cug-suave: #55666a;
+  --cug-cielo: #c3cec9;
+  --cug-sombra: #3c4a44;
+  --cug-anillo: #ffffff;
+
+  /* Portada. hilo y base son r,g,b: el lienzo les pone su transparencia. */
+  --heroe-claro: 0;
+  --heroe-hilo: 242,234,216;
+  --heroe-base: 8,24,31;
+  --heroe-velo: 11,29,36;
+  --heroe-lavado: 0;
+  --heroe-casing: var(--heroe-base);
+
+  /* Páginas impresas y su maqueta en la portada. */
+  --p-papel: #fdfbf5;
+  --p-tinta: #26363a;
+  --p-suave: #55666a;
+  --p-cient: #3e4f50;
+  --p-acento: #8a5a12;
+  --p-filete: #8c9b98;
+  --p-marco: #c3cec9;
+  --p-raya: #d9dfda;
+  --p-hueco: #e6e9e2;
+}
+
+/* Coral: el coral intenso de los mapas de Lhasa y Muros. Vino negro, coral y ruta cian. */
+:root[data-tema="coral"] {
+  --noche: #160b11; --noche-2: #221119; --noche-3: #311a24; --linea: #4c2d37; --linea-2: #755059;
+  --fg: #fdf1e9; --muted: #cbb6b0; --oro: #ff7a5c; --oro-2: #ff9c84; --ruta: #3fe0e0;
+  --velo: rgb(14 6 10 / .8);
+  --c-plantas: #2ea25f; --c-herpetos: #2f93d6; --c-aves: #dc7018; --c-mamiferos: #a07de8; --c-insectos: #b0920f; --c-hongos: #de5590; --c-otros: #7d9440;
+  --rampa-noche: #1c0e18, #3d1524, #6d1f30, #a83036, #dc4a40, #f2674f, #fa8d70, #fbab8e, #ffc8ad;
+  --rampa-papel: #fff1e8, #ffe2d3, #ffd2bf, #fdbfa8, #f9a98e, #f49277, #ec7d66, #e2705f, #f6dcd0;
+  --rampa-heroe: #1c0e18, #3d1524, #6d1f30, #a83036, #dc4a40, #f2674f, #fa8d70, #fbab8e, #ffc8ad;
+  --rampa-heroe-fondo: #120a0e, #150b10, #180c12, #1b0d14, #1e0e16, #210f18, #24101a, #27111c, #2a121e;
+  --lam-halo: rgba(20,8,14,.84); --lam-casing: #10282c; --lam-anillo: #fff3ea; --lam-vacio: #221119;
+  --lam-mar-fondo: #0d2a30; --lam-mar-fondo2: #123a40; --lam-mar-linea: #3fe0e0;
+  --lam-curva-fina: rgba(255,232,216,.3); --lam-curva-maestra: rgba(255,232,216,.6);
+  --lam-curva-halo: rgba(30,10,18,.86); --lam-curva-cota: #ffe9db;
+  --cua-sombra: #0c0509;
+  --gui-fondo: #fff8f3; --gui-tinta: #3a1520; --gui-suave: #70454c; --gui-halo: rgba(255,248,243,.9); --gui-casing: #fff8f3; --gui-blanco: #fff8f3; --gui-ruta: #0d7f86; --gui-vacio: #ffe9df;
+  --gui-mar-fondo: #d8f1f0; --gui-mar-fondo2: #c4e9e8; --gui-mar-linea: #1f8a8e;
+  --gui-curva-fina: rgba(110,40,40,.32); --gui-curva-maestra: rgba(100,30,36,.6); --gui-curva-halo: rgba(255,240,232,.92); --gui-curva-cota: #5a1c26;
+  --cug-tinta: #3a1520; --cug-suave: #70454c; --cug-cielo: #f3c9bb; --cug-sombra: #5a2028;
+  --heroe-hilo: 253,241,233; --heroe-base: 16,8,12; --heroe-velo: 22,11,17;
+  --p-papel: #fff8f3; --p-tinta: #3a1520; --p-suave: #70454c; --p-cient: #5a2c34; --p-acento: #b23a22; --p-filete: #c79a8e; --p-marco: #f3c9bb; --p-raya: #f6dcd0; --p-hueco: #fbe9e0;
+}
+
+/* Oro noche: el agua de oro, la llanura turquesa y el fondo azul noche de Lhasa. */
+:root[data-tema="oronoche"] {
+  --noche: #070d20; --noche-2: #0e1630; --noche-3: #182347; --linea: #27345e; --linea-2: #485885;
+  --fg: #f6f1e1; --muted: #b0b8cf; --oro: #ffd55e; --oro-2: #ffe491; --ruta: #ff6f5e;
+  --velo: rgb(3 6 18 / .8);
+  --c-plantas: #2aa26a; --c-herpetos: #3a90dc; --c-aves: #e8603c; --c-mamiferos: #a07de8; --c-insectos: #bb8a14; --c-hongos: #de5590; --c-otros: #84944a;
+  --rampa-noche: #ffd86a, #e9cb6c, #93bd8c, #47b2a4, #2596a4, #1a7693, #17567a, #123a5e, #0c2244;
+  --rampa-papel: #fff3c9, #fbeab8, #dcecc6, #bfe8dc, #a2dde0, #8ccbdc, #7fb2d0, #7799c0, #e6ecf6;
+  --rampa-heroe: #ffd86a, #e9cb6c, #93bd8c, #47b2a4, #2596a4, #1a7693, #17567a, #123a5e, #0c2244;
+  --rampa-heroe-fondo: #060b1b, #070c1e, #080e21, #090f24, #0a1027, #0b112a, #0c122d, #0d1330, #0e1433;
+  --lam-halo: rgba(6,11,28,.84); --lam-casing: #050a1a; --lam-anillo: #fff9e6; --lam-vacio: #0e1630;
+  --lam-mar-fondo: #09122c; --lam-mar-fondo2: #0f1c3e; --lam-mar-linea: #ffd86a;
+  --lam-curva-fina: rgba(255,246,214,.3); --lam-curva-maestra: rgba(255,246,214,.6);
+  --lam-curva-halo: rgba(8,14,36,.86); --lam-curva-cota: #fff3cf;
+  --cua-sombra: #03071a;
+  --gui-fondo: #fbfaf3; --gui-tinta: #12204a; --gui-suave: #485480; --gui-halo: rgba(251,250,243,.9); --gui-casing: #fbfaf3; --gui-blanco: #fbfaf3; --gui-ruta: #d33a2c; --gui-vacio: #eef1ea;
+  --gui-mar-fondo: #fff2c4; --gui-mar-fondo2: #fbe7a8; --gui-mar-linea: #a98212;
+  --gui-curva-fina: rgba(20,44,90,.3); --gui-curva-maestra: rgba(16,36,80,.6); --gui-curva-halo: rgba(246,246,236,.92); --gui-curva-cota: #12204a;
+  --cug-tinta: #12204a; --cug-suave: #485480; --cug-cielo: #cfd8e6; --cug-sombra: #16264e;
+  --heroe-hilo: 246,241,225; --heroe-base: 5,9,24; --heroe-velo: 7,13,32;
+  --p-papel: #fbfaf3; --p-tinta: #12204a; --p-suave: #485480; --p-cient: #2a3866; --p-acento: #8a6a00; --p-filete: #93a0bc; --p-marco: #cfd8e6; --p-raya: #dde3ee; --p-hueco: #e9ecf3;
+}
+
+/* Violeta: violeta tinta #614BC1 y oro, la marca de Miguel. */
+:root[data-tema="violeta"] {
+  --noche: #140f2e; --noche-2: #1e1742; --noche-3: #2c2259; --linea: #3f3373; --linea-2: #635698;
+  --fg: #f7f1e6; --muted: #bcb4da; --oro: #ecc75e; --oro-2: #f5dc90; --ruta: #ffc93c;
+  --velo: rgb(10 7 26 / .8);
+  --c-plantas: #2aa268; --c-herpetos: #2f93d6; --c-aves: #e8603c; --c-mamiferos: #b56fdc; --c-insectos: #bb8a14; --c-hongos: #de5590; --c-otros: #84944a;
+  --rampa-noche: #1b1344, #2a1d66, #3d2c8e, #533fb0, #614bc1, #7a66d0, #9585da, #c3a85e, #ecc75e;
+  --rampa-papel: #f2eefb, #e8e2f8, #dcd4f5, #cec4f1, #bfb2ec, #b0a1e6, #a593df, #9c88d8, #f6e7b6;
+  --rampa-heroe: #1b1344, #2a1d66, #3d2c8e, #533fb0, #614bc1, #7a66d0, #9585da, #c3a85e, #ecc75e;
+  --rampa-heroe-fondo: #100c26, #120d2a, #130e2d, #150f30, #161033, #181136, #191239, #1b133c, #1c143f;
+  --lam-halo: rgba(16,11,40,.84); --lam-casing: #0e0a24; --lam-anillo: #fff9ea; --lam-vacio: #1e1742;
+  --lam-mar-fondo: #120d2e; --lam-mar-fondo2: #1b1444; --lam-mar-linea: #ecc75e;
+  --lam-curva-fina: rgba(255,244,214,.3); --lam-curva-maestra: rgba(255,244,214,.62);
+  --lam-curva-halo: rgba(18,12,44,.86); --lam-curva-cota: #fff0c8;
+  --cua-sombra: #0b0820;
+  --gui-fondo: #fdfbf6; --gui-tinta: #2a1f5e; --gui-suave: #5a5088; --gui-halo: rgba(253,251,246,.9); --gui-casing: #fdfbf6; --gui-blanco: #fdfbf6; --gui-ruta: #b8860b; --gui-vacio: #f2eefb;
+  --gui-mar-fondo: #ebe6fa; --gui-mar-fondo2: #ded6f6; --gui-mar-linea: #614bc1;
+  --gui-curva-fina: rgba(60,44,140,.3); --gui-curva-maestra: rgba(50,36,120,.6); --gui-curva-halo: rgba(246,242,252,.92); --gui-curva-cota: #2a1f5e;
+  --cug-tinta: #2a1f5e; --cug-suave: #5a5088; --cug-cielo: #d9d2f0; --cug-sombra: #2f2470;
+  --heroe-hilo: 247,241,230; --heroe-base: 14,10,36; --heroe-velo: 20,15,46;
+  --p-papel: #fdfbf6; --p-tinta: #2a1f5e; --p-suave: #5a5088; --p-cient: #43387a; --p-acento: #8a6a00; --p-filete: #a79fcb; --p-marco: #d9d2f0; --p-raya: #e6e1f4; --p-hueco: #efebf8;
+}
+
+/* Papel: atlas claro. Crema, tinta azul negra y rojo de imprenta. */
+:root[data-tema="papel"] {
+  color-scheme: light;
+  --noche: #f7f1e3; --noche-2: #efe7d3; --noche-3: #e4dabf; --linea: #cbc0a4; --linea-2: #978c72;
+  --fg: #1d2933; --muted: #535e66; --oro: #1d4f7c; --oro-2: #2a6596; --ruta: #c8341a;
+  --velo: rgb(29 41 51 / .55);
+  --c-plantas: #1f8a4c; --c-herpetos: #1f78c4; --c-aves: #d2502c; --c-mamiferos: #8a63d8; --c-insectos: #9a7000; --c-hongos: #c93f7e; --c-otros: #66782f;
+  --rampa-noche: #b9ccd6, #c6d6db, #d3dfdf, #e0e6dd, #ebecd9, #f3f0d8, #f8f4dc, #fbf8e6, #fffdf4;
+  --rampa-papel: #cddbe2, #d6e1e5, #dfe7e6, #e8ece2, #f0f0de, #f6f3dd, #faf6e1, #fcf9ea, #fffdf6;
+  --rampa-heroe: #b9ccd6, #c6d6db, #d3dfdf, #e0e6dd, #ebecd9, #f3f0d8, #f8f4dc, #fbf8e6, #fffdf4;
+  --rampa-heroe-fondo: #f7f1e3, #f6f0e1, #f5eedf, #f4eddd, #f3ecdb, #f2ead9, #f1e9d7, #f0e7d5, #efe6d3;
+  --lam-claro: 1; --lam-halo: rgba(247,241,227,.88); --lam-casing: #f7f1e3; --lam-anillo: #ffffff; --lam-blanco: #f7f1e3; --lam-vacio: #efe7d3;
+  --lam-mar-fondo: #d9e8ee; --lam-mar-fondo2: #cbe0e8; --lam-mar-linea: #4f7f96;
+  --lam-curva-fina: rgba(60,48,40,.3); --lam-curva-maestra: rgba(50,38,32,.6); --lam-curva-halo: rgba(247,241,227,.92); --lam-curva-cota: #33291f;
+  --cua-sombra: #3a3f40;
+  --gui-fondo: #fbf7ec; --gui-tinta: #1d2933; --gui-suave: #535e66; --gui-halo: rgba(251,247,236,.9); --gui-casing: #fbf7ec; --gui-blanco: #fbf7ec; --gui-vacio: #efe7d3;
+  --gui-mar-fondo: #deebf0; --gui-mar-fondo2: #d0e3ea; --gui-mar-linea: #4f7f96;
+  --gui-curva-fina: rgba(60,48,40,.3); --gui-curva-maestra: rgba(50,38,32,.6); --gui-curva-halo: rgba(251,247,236,.92); --gui-curva-cota: #33291f;
+  --cug-tinta: #1d2933; --cug-suave: #535e66; --cug-cielo: #d8cfb8; --cug-sombra: #3a3f40;
+  --heroe-claro: 1; --heroe-hilo: 29,41,51; --heroe-base: 247,241,227; --heroe-velo: 247,241,227; --heroe-lavado: .62;
+  --p-papel: #fbf7ec; --p-tinta: #1d2933; --p-suave: #535e66; --p-cient: #39454e; --p-acento: #a22a14; --p-filete: #a89d84; --p-marco: #d8cfb8; --p-raya: #e6dfcc; --p-hueco: #efe9da;
+}
+
+/* Lindis: la rampa amarillo del Lindis. Papel de oro, tinta granate, azules y agua blanca. */
+:root[data-tema="lindis"] {
+  color-scheme: light;
+  --noche: #f8edcf; --noche-2: #f0e1b9; --noche-3: #e6d3a3; --linea: #cfb986; --linea-2: #a18957;
+  --fg: #3b0a37; --muted: #6a3f5c; --oro: #7a0d62; --oro-2: #961f7b; --ruta: #123f9e;
+  --velo: rgb(58 10 54 / .55);
+  --c-plantas: #1c8a58; --c-herpetos: #1c74c8; --c-aves: #d24a2c; --c-mamiferos: #7f5cd8; --c-insectos: #8f6a00; --c-hongos: #c23a90; --c-otros: #5f7a30;
+  --rampa-noche: #f4f8ff, #a6cdf3, #4a97e0, #2559b0, #2b2580, #5a1668, #862a5a, #ad7850, #d4b25a;
+  --rampa-papel: #f2f7ff, #bcd9f5, #7fb0e8, #7f86d6, #a36cc0, #c46fa0, #d99c7a, #e4bf6c, #efd487;
+  --rampa-heroe: #f4f8ff, #a6cdf3, #4a97e0, #2559b0, #2b2580, #5a1668, #862a5a, #ad7850, #d4b25a;
+  --rampa-heroe-fondo: #f8edcf, #f7ebcc, #f6e9c9, #f5e7c6, #f4e5c3, #f3e3c0, #f2e1bd, #f1dfba, #f0ddb7;
+  --lam-claro: 1; --lam-halo: rgba(248,237,207,.9); --lam-casing: #2a0628; --lam-anillo: #fff8e4; --lam-blanco: #f8edcf; --lam-ruta: #fffdf0; --clave-ruta: #2a0628; --lam-vacio: #f0e1b9;
+  --lam-mar-fondo: #eef5fc; --lam-mar-fondo2: #dbe9f8; --lam-mar-linea: #2559b0;
+  --lam-curva-fina: rgba(255,246,216,.34); --lam-curva-maestra: rgba(255,246,216,.66); --lam-curva-halo: rgba(58,10,54,.82); --lam-curva-cota: #fff3cf;
+  --cua-sombra: #2a0628;
+  --gui-fondo: #fdf8e8; --gui-tinta: #3b0a37; --gui-suave: #6a3f5c; --gui-halo: rgba(253,248,232,.9); --gui-casing: #fdf8e8; --gui-blanco: #fdf8e8; --gui-ruta: #7a0d62; --gui-vacio: #f6ecd0;
+  --gui-mar-fondo: #eef5fc; --gui-mar-fondo2: #dbe9f8; --gui-mar-linea: #2559b0;
+  --gui-curva-fina: rgba(70,16,66,.3); --gui-curva-maestra: rgba(60,12,56,.6); --gui-curva-halo: rgba(253,248,232,.92); --gui-curva-cota: #3b0a37;
+  --cug-fondo: #fffdf6; --cug-tinta: #3b0a37; --cug-suave: #6a3f5c; --cug-cielo: #e6d3a3; --cug-sombra: #3b0a37;
+  --heroe-claro: 1; --heroe-hilo: 59,10,55; --heroe-base: 248,237,207; --heroe-velo: 248,237,207; --heroe-lavado: .62; --heroe-casing: 42,6,40;
+  --p-papel: #fdf8e8; --p-tinta: #3b0a37; --p-suave: #6a3f5c; --p-cient: #522650; --p-acento: #7a0d62; --p-filete: #b49c6a; --p-marco: #e6d3a3; --p-raya: #efe0bb; --p-hueco: #f6ecd0;
+}
+
+/* Pastel: la paleta pastel con oro de Miguel. Sin negro: la tinta es ciruela. */
+:root[data-tema="pastel"] {
+  color-scheme: light;
+  --noche: #fdf8f4; --noche-2: #f8f1f7; --noche-3: #f1e8f4; --linea: #ddd0e4; --linea-2: #ac9cb9;
+  --fg: #3b3350; --muted: #655d7a; --oro: #8a6000; --oro-2: #a37400; --ruta: #d4307a;
+  --velo: rgb(59 51 80 / .5);
+  --c-plantas: #27925e; --c-herpetos: #2f82cc; --c-aves: #dc5a3c; --c-mamiferos: #8f6adc; --c-insectos: #a07a10; --c-hongos: #d0478c; --c-otros: #6b8236;
+  --rampa-noche: #c6e4f5, #c6ece0, #dff2c6, #fdf0b6, #fddcb8, #fbc9ce, #e8c4ee, #cfc4f6, #fdf5de;
+  --rampa-papel: #d8edf8, #d8f2ea, #e9f6d8, #fdf5cc, #fde7cf, #fcdade, #efd8f3, #e0d9f9, #fdf8e8;
+  --rampa-heroe: #c6e4f5, #c6ece0, #dff2c6, #fdf0b6, #fddcb8, #fbc9ce, #e8c4ee, #cfc4f6, #fdf5de;
+  --rampa-heroe-fondo: #fdf8f4, #fcf7f4, #fbf6f4, #faf5f4, #f9f4f4, #f8f3f4, #f7f2f4, #f6f1f4, #f5f0f4;
+  --lam-claro: 1; --lam-halo: rgba(253,248,244,.9); --lam-casing: #fdf8f4; --lam-anillo: #ffffff; --lam-blanco: #fdf8f4; --lam-vacio: #f7eff6;
+  --lam-mar-fondo: #d4ebf7; --lam-mar-fondo2: #c4e3f4; --lam-mar-linea: #6a8fb8;
+  --lam-curva-fina: rgba(80,60,110,.3); --lam-curva-maestra: rgba(70,50,100,.58); --lam-curva-halo: rgba(253,248,244,.92); --lam-curva-cota: #3b3350;
+  --cua-sombra: #4b4068;
+  --gui-fondo: #fefbf8; --gui-tinta: #3b3350; --gui-suave: #655d7a; --gui-halo: rgba(254,251,248,.9); --gui-casing: #fefbf8; --gui-blanco: #fefbf8; --gui-ruta: #d4307a; --gui-vacio: #f7eff6;
+  --gui-mar-fondo: #d8edf8; --gui-mar-fondo2: #cae6f5; --gui-mar-linea: #6a8fb8;
+  --gui-curva-fina: rgba(80,60,110,.3); --gui-curva-maestra: rgba(70,50,100,.58); --gui-curva-halo: rgba(254,251,248,.92); --gui-curva-cota: #3b3350;
+  --cug-tinta: #3b3350; --cug-suave: #655d7a; --cug-cielo: #e4d9ea; --cug-sombra: #4b4068;
+  --heroe-claro: 1; --heroe-hilo: 59,51,80; --heroe-base: 253,248,244; --heroe-velo: 253,248,244; --heroe-lavado: .7;
+  --p-papel: #fefbf8; --p-tinta: #3b3350; --p-suave: #655d7a; --p-cient: #4f4766; --p-acento: #876400; --p-filete: #b5a7c0; --p-marco: #e4d9ea; --p-raya: #eee6f1; --p-hueco: #f5eff6;
+}

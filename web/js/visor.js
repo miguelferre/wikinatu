@@ -14,11 +14,13 @@ import { pintarCartela } from './visor-cartela.js';
 import { iniciarInventario, ponerInventario } from './inventario.js';
 import { abrirFicha, iniciarFicha } from './ficha.js';
 import { descargarGuia } from './guia.js';
+import { especiesCartela, pintarCarga } from './carga.js';
 
 registrar(TEXTOS_VISOR);
 
 const $ = (id) => document.getElementById(id);
 const COLORES = ['plantas', 'aves', 'insectos', 'hongos', 'mamiferos', 'herpetos', 'otros'];
+const PAGINAS_PUNTOS = 6;
 
 // ?mes=7 fija el mes de entrada; sin él, el mes actual.
 function mesInicial() {
@@ -31,19 +33,15 @@ export const S = {
   filas: [], porId: new Map(), obs: [], fecha: new Date(), completa: false,
   mes: mesInicial(), todoAnio: false, calidad: 'investigacion', local: 'auto',
   lamina: null, cuadro: null, token: 0, versionLamina: 0, aspecto: 0, pasilloM: 500,
+  // Fases de la carga en curso: ver resumenCarga. obsListas: los puntos ya no van a cambiar.
+  carga: { relieve: null, especies: null, puntos: null, nombres: null, parcial: null, mostrada: false, final: '' },
+  obsListas: false, fallo: false, guiaOcupada: false,
 };
 
 export const formato = (n) => new Intl.NumberFormat(idiomaActual() === 'es' ? 'es-ES' : 'en-GB', { useGrouping: 'always' }).format(n);
 export const mesesFiltro = () => (S.todoAnio ? null : ventanaMeses(S.mes));
 export const filtrosActuales = () => ({ meses: mesesFiltro(), calidad: S.calidad });
 export const ventanaTexto = () => textoVentana(mesesFiltro(), t('meses'), { todo: t('todo_anio').toLowerCase(), a: idiomaActual() === 'es' ? 'a' : 'to' });
-
-function estado(texto, f = null) {
-  $('estado').textContent = texto;
-  const p = $('progreso');
-  p.classList.toggle('fin', f == null);
-  if (f != null) p.style.setProperty('--f', f);
-}
 
 function aviso(texto, reintentar = null) {
   const a = $('aviso');
@@ -66,17 +64,19 @@ const errorApi = (e) => (e?.message === 'inat_ocupado' ? t('err_ocupado') : e in
 function refrescarCartela() {
   if (!S.ruta) return;
   pintarCartela($('cartela'), {
-    nombre: S.ruta.nombre, resumen: S.resumen, filas: S.filas, ventana: ventanaTexto(), puntos: S.ruta.puntos, completa: S.completa,
-    esquina: S.lamina?.esquinaLibre() ?? 'ne', sinRelieve: !!S.lamina?.dem?.sinDatos, formato,
+    nombre: S.ruta.nombre, resumen: S.resumen, filas: S.filas, ventana: ventanaTexto(), puntos: S.ruta.puntos,
+    esquina: S.lamina?.esquinaLibre() ?? 'ne', sinRelieve: !!S.lamina?.dem?.sinDatos, formato, textoEspecies: especiesCartela,
   });
 }
 
 function pintarCuadroActual() {
+  // Sin relieve aún no hay perfil: crearPlancha repinta al terminar.
+  if (S.carga.relieve === 'cargando') return;
   const caja = $('cuadro');
   S.cuadro?.destruir?.();
   S.cuadro = null;
   const hayPerfil = S.perfil.some((p) => p.alt != null);
-  $('cuadroNota').textContent = !hayPerfil ? t('cuadro_sin_dem') : S.obs.length || !S.completa ? t('cuadro_nota') : t('cuadro_vacio');
+  $('cuadroNota').textContent = !hayPerfil ? t('cuadro_sin_dem') : S.obs.length || !S.obsListas ? t('cuadro_nota') : t('cuadro_vacio');
   if (!hayPerfil) { caja.replaceChildren(); return; }
   const etiquetas = elegirEtiquetas(S.filas, S.obs, S.perfil, S.proyectar, 24);
   const n = new Map();
@@ -95,6 +95,8 @@ async function crearPlancha() {
   S.lamina = null;
   caja.classList.remove('lista');
   caja.classList.add('cargando');
+  S.carga.relieve = 'cargando';
+  pintarCarga();
   const lamina = await crearLamina(caja, { puntos: S.ruta.puntos, nombre: S.ruta.nombre }, {
     alPulsar: abrirFicha, alResaltar: (x) => S.cuadro?.resaltar(x),
   });
@@ -103,6 +105,7 @@ async function crearPlancha() {
   caja.classList.remove('cargando');
   caja.classList.add('lista');
   S.lamina = lamina;
+  S.carga.relieve = 'listo';
   if (!S.perfil.length) {
     S.perfil = perfilDe(S.ruta.puntos, lamina.dem.altura);
     S.resumen = resumenPerfil(S.perfil);
@@ -110,6 +113,7 @@ async function crearPlancha() {
   refrescarCartela();
   ponerPuntosEnLamina();
   pintarCuadroActual();
+  pintarCarga();
 }
 
 function ponerPuntosEnLamina() {
@@ -121,7 +125,7 @@ async function nombresLocales(tk, filtros) {
   for (const f of S.filas) f.nombreLocal = null;
   if (!loc || loc === idiomaActual()) return;
   const mapa = await contarEspecies(S.tramos.tramos, filtros, loc,
-    (a, b) => { if (tk === S.token) estado(t('nombres_locales', { a, b }), a / b); }, () => tk !== S.token);
+    (a, b) => { if (tk === S.token) { S.carga.nombres = { a, b }; pintarCarga(); } }, () => tk !== S.token);
   if (!mapa || tk !== S.token) return;
   for (const f of S.filas) {
     const e = mapa.get(f.id);
@@ -130,23 +134,41 @@ async function nombresLocales(tk, filtros) {
   }
 }
 
+function fallar(e) {
+  Object.assign(S.carga, { especies: null, puntos: null, nombres: null, parcial: null });
+  S.fallo = true;
+  aviso(errorApi(e), consultar);
+  ponerInventario(S.filas);
+  refrescarCartela();
+  pintarCarga();
+}
+
 export async function consultar() {
   if (!S.ruta) return;
   const tk = ++S.token;
   const cancelado = () => tk !== S.token;
   const filtros = filtrosActuales();
+  const n = S.tramos.tramos.length;
+  const loc = localeLocal(S.local, centroDe(S.ruta.puntos));
   aviso('');
-  S.completa = false;
+  S.completa = false; S.obsListas = false; S.fallo = false;
+  S.carga.final = '';
   $('btnGuia').disabled = true;
-  estado(t('tramo', { a: 0, b: S.tramos.tramos.length }), 0);
+  Object.assign(S.carga, {
+    especies: { a: 0, b: n }, puntos: { a: 0, b: PAGINAS_PUNTOS },
+    nombres: loc && loc !== idiomaActual() ? { a: 0, b: n } : null, parcial: null,
+  });
+  pintarCarga();
   let mapa;
   try {
-    mapa = await contarEspecies(S.tramos.tramos, filtros, idiomaActual(),
-      (a, b) => { if (tk === S.token) estado(t('tramo', { a, b }), a / b); }, cancelado);
+    mapa = await contarEspecies(S.tramos.tramos, filtros, idiomaActual(), (a, b, parcial) => {
+      if (cancelado()) return;
+      S.carga.especies = { a, b };
+      S.carga.parcial = soloEspecies([...parcial.values()]).length;
+      pintarCarga();
+    }, cancelado);
   } catch (e) {
-    if (tk !== S.token) return;
-    estado('');
-    aviso(errorApi(e), consultar);
+    if (!cancelado()) fallar(e);
     return;
   }
   if (!mapa || cancelado()) return;
@@ -156,21 +178,28 @@ export async function consultar() {
   S.porId = new Map(S.filas.map((f) => [f.id, f]));
   S.obs = [];
   S.completa = true;
+  S.carga.parcial = null;
   refrescarCartela();
   ponerPuntosEnLamina();
   ponerInventario(S.filas);
   if (!S.filas.length) {
-    estado('');
+    S.obsListas = true;
+    Object.assign(S.carga, { puntos: null, nombres: null });
     aviso(t('sin_especies', { ventana: ventanaTexto() }));
     pintarCuadroActual();
+    pintarCarga();
     return;
   }
+  pintarCarga();
 
   // Puntos de las 40 más vistas. Si falla, la lista ya está en pantalla.
-  estado(t('puntos'), 1);
   try {
     const ids = S.filas.slice(0, 40).map((f) => f.id);
-    const crudos = await puntosDe(S.caja, ids, filtros, 6, cancelado);
+    const crudos = await puntosDe(S.caja, ids, filtros, PAGINAS_PUNTOS, cancelado, (a, b) => {
+      if (cancelado()) return;
+      S.carga.puntos = { a, b };
+      pintarCarga();
+    });
     if (!crudos || cancelado()) return;
     S.obs = crudos.filter((p) => S.tramos.contiene(p.lat, p.lon) && S.porId.has(p.taxon)).map((p) => {
       const f = S.porId.get(p.taxon);
@@ -180,8 +209,11 @@ export async function consultar() {
     if (cancelado()) return;
     aviso(t('err_puntos'), consultar);
   }
+  S.obsListas = true;
+  S.carga.puntos = { a: S.carga.puntos.b, b: S.carga.puntos.b };
   ponerPuntosEnLamina();
   pintarCuadroActual();
+  pintarCarga();
 
   try {
     await nombresLocales(tk, filtros);
@@ -191,9 +223,11 @@ export async function consultar() {
     if (cancelado()) return;
     aviso(t('err_local'));
   }
+  if (S.carga.nombres) S.carga.nombres = { a: S.carga.nombres.b, b: S.carga.nombres.b };
   // La guía necesita puntos y nombres locales: el botón espera a tenerlos.
   $('btnGuia').disabled = false;
-  estado(t('listo', { fecha: fechaTexto() }));
+  S.carga.final = t('listo', { fecha: fechaTexto() });
+  pintarCarga();
 }
 
 const nombreDe = (f) => f.nombre || f.nombreEn || f.cientifico;
@@ -207,13 +241,15 @@ function vaciar() {
   for (const id of ['filtros', 'plancha', 'seccionCuadro', 'seccionInventario']) $(id).hidden = true;
   $('vacio').hidden = false;
   $('btnGuia').disabled = true;
+  Object.assign(S.carga, { relieve: null, especies: null, puntos: null, nombres: null, parcial: null, final: '' });
+  pintarCarga();
   aviso('');
   document.title = 'WikiNatu';
   barra();
 }
 
 export function abrirRuta(ruta) {
-  Object.assign(S, { ruta, perfil: [], resumen: null, filas: [], porId: new Map(), obs: [], completa: false });
+  Object.assign(S, { ruta, perfil: [], resumen: null, filas: [], porId: new Map(), obs: [], completa: false, obsListas: false, fallo: false });
   S.tramos = tramosDeRuta(ruta.puntos);
   // Cada punto marca su celda y las vecinas: el pasillo mide al menos un paso a cada lado.
   S.pasilloM = Math.floor((S.tramos.paso * 111000 * Math.cos((ruta.puntos[0].lat * Math.PI) / 180)) / 50) * 50;

@@ -22,7 +22,7 @@ main { flex: 1; }
 .boton:hover { border-color: var(--oro); transition-duration: var(--dur-rapida); }
 .boton:disabled { color: var(--muted); border-color: var(--linea); cursor: default; }
 .boton-oro { color: var(--noche); background: var(--oro); border-color: var(--oro); }
-.boton-oro:hover { background: #f4e2a8; }
+.boton-oro:hover { background: var(--oro-2); }
 .boton-oro:disabled { color: var(--muted); background: transparent; }
 .boton-fino { padding: 5px 10px 6px; font-size: .96rem; }
 .boton-fino[aria-pressed="true"] { color: var(--noche); background: var(--oro); border-color: var(--oro); }
@@ -80,7 +80,7 @@ main { flex: 1; }
 .cartela-clave { display: flex; flex-wrap: wrap; gap: 2px 10px; margin: 7px 0 0; padding: 0; font-size: .86rem; line-height: 1.3; list-style: none; }
 .cartela-clave li { display: inline-flex; align-items: center; gap: 5px; }
 .punto { flex: none; display: inline-block; width: 9px; height: 9px; border: 1px solid var(--fg); border-radius: 50%; }
-.punto-ruta { width: 16px; height: 3px; background: var(--ruta); border: 0; border-radius: 0; }
+.punto-ruta { width: 16px; height: 3px; background: var(--lam-ruta); border: 0; border-radius: 0; outline: 1px solid var(--clave-ruta); }
 .cartela-pie { margin-top: 6px; color: var(--muted); font-size: .85rem; text-align: center; }
 .cartela-pie a { color: var(--muted); }
 
@@ -151,7 +151,7 @@ main { flex: 1; }
 /* Ficha */
 .ficha { width: min(1020px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); padding: 0; overflow: auto; color: var(--fg); background: var(--noche); border: 1px solid var(--oro); outline: 1px solid var(--linea-2); outline-offset: -6px; }
 .ficha[open] { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr); animation: ficha-entra var(--dur-lenta) var(--ease-entrada); }
-.ficha::backdrop { background: rgb(5 14 18 / .78); }
+.ficha::backdrop { background: var(--velo); }
 @keyframes ficha-entra { from { opacity: 0; transform: translateY(6px); } }
 .ficha-cerrar { position: absolute; top: 12px; right: 12px; z-index: 2; display: grid; width: 32px; height: 32px; place-items: center; color: var(--fg); background: var(--noche); border: 1px solid var(--linea-2); cursor: pointer; }
 .ficha-foto { display: flex; flex-direction: column; min-height: 0; padding: 14px 0 14px 14px; }
@@ -192,3 +192,33 @@ main { flex: 1; }
 
 /* Con la lámina puesta, manda su propio formato. */
 .plancha-lienzo.lista { height: auto; aspect-ratio: auto; }
+
+/* Carga: se lee como estado, nunca como «no hay nada». El peso va en el aviso; lo viejo baja de tono. */
+.plancha-lienzo { position: relative; }
+.carga { position: absolute; top: 50%; left: 50%; z-index: 4; width: min(470px, calc(100% - 28px)); padding: 20px 28px 17px; color: var(--fg); text-align: center; background: var(--noche); border: 1px solid var(--oro); outline: 1px solid var(--linea-2); outline-offset: -6px; transform: translate(-50%, -50%); animation: carga-entra var(--dur-lenta) var(--ease-entrada); }
+@keyframes carga-entra { from { opacity: 0; } }
+.carga-sup { color: var(--muted); font: 500 .86rem/1.2 var(--versal); letter-spacing: .08em; }
+.carga-que { margin-top: 4px; font: italic 500 clamp(1.7rem, 1.3rem + 1.5vw, 2.3rem)/1.1 var(--display); text-wrap: balance; }
+.carga-paso { min-height: 1.4em; margin-top: 5px; font-size: 1.04rem; line-height: 1.35; font-variant-numeric: lining-nums tabular-nums; }
+.carga-nota { margin-top: 9px; color: var(--muted); font-size: .9rem; line-height: 1.3; }
+.carga-barra { position: relative; height: 6px; margin-top: 10px; overflow: hidden; background: var(--linea); }
+.carga-barra span { position: absolute; inset: 0; background: var(--oro); transform: scaleX(var(--f, 0)); transform-origin: left; transition: transform var(--dur-lenta) var(--ease-entrada); }
+/* Latido sobre la barra: entre dos tramos pasa un segundo y no debe parecer colgada. */
+.carga-barra::after { content: ""; position: absolute; inset: 0 auto 0 0; width: 22%; background: var(--fg); opacity: 0; animation: carga-latido 1.8s linear infinite; }
+@keyframes carga-latido { 0% { opacity: 0; transform: translateX(-100%); } 25% { opacity: .35; } 75% { opacity: .35; } 100% { opacity: 0; transform: translateX(460%); } }
+.carga-linea { display: grid; grid-template-columns: minmax(0, 1fr); gap: 5px; margin: 0 0 10px; padding: 8px 12px 9px; border-left: 2px solid var(--oro); background: var(--noche-2); }
+#inventarioCarga { margin-top: 2px; }
+.carga-linea-texto { font-size: 1rem; line-height: 1.3; font-variant-numeric: lining-nums tabular-nums; }
+.carga-linea .carga-barra { height: 3px; margin-top: 0; }
+
+/* Lo viejo: el texto pasa al color secundario, sin opacidad. Las figuras sí bajan de tono. */
+.especies.actualizando, .grupos.actualizando, .cartela.actualizando { --fg: var(--muted); color: var(--muted); }
+.especies.actualizando img { filter: grayscale(.7) brightness(.62); }
+.cuadro-caja.actualizando { opacity: .42; }
+.especies, .cuadro-caja { transition: opacity var(--dur-media-salida) var(--ease-salida); }
+.especie.fantasma { min-height: 250px; background: var(--noche-2); }
+
+/* El botón desactivado cambia de aspecto tarde: lo que sale de caché no lo hace parpadear. */
+#btnGuia { display: inline-grid; }
+#btnGuia::after { content: attr(data-ancho); height: 0; overflow: hidden; visibility: hidden; }
+.boton-oro:disabled { transition: color var(--dur-media) linear 200ms, background-color var(--dur-media) linear 200ms, border-color var(--dur-media) linear 200ms; }

@@ -4,17 +4,6 @@
 // Bajo este valor es mar. El modelo suavizado no llega a 0 justo en la orilla.
 export const UMBRAL_MAR = 1.2;
 
-// Rampa de plancha: tintas apagadas de verdín a pergamino. La luz del sombreado hace el resto.
-export const RAMPA_PLANCHA = ['#16343a', '#20474a', '#2f5c54', '#4a7059', '#74835c', '#9c9460', '#bba670', '#d0bb8e', '#e4d6b4'];
-
-// La versión de papel: la guía se imprime y pide tintas más claras que la rampa base.
-export const RAMPA_PAPEL = ['#e4ece5', '#d9e5d9', '#cfdec8', '#dbdfb8', '#e7dfb0', '#e6d29e', '#dcbf8a', '#cfab7e', '#c29f82'];
-
-const MAR = {
-  noche: { fondo: [9, 28, 37], fondo2: [13, 40, 49], linea: [122, 164, 164] },
-  papel: { fondo: [226, 236, 234], fondo2: [214, 228, 226], linea: [86, 122, 128] },
-};
-
 // El mar trae batimetría: si entra en la rampa aplasta la tierra. Se pinta aparte.
 export function separarMar(dem) {
   const { W, datos, ax, ay, ancho, alto } = dem;
@@ -68,7 +57,8 @@ function distanciaACosta(esMar, w, h) {
 }
 
 // Normales de costa: líneas paralelas a la orilla, cada vez más separadas y más tenues.
-export function grabarMar(canvas, dem, { rampa, escala, unidad }) {
+// mar: { fondo, fondo2, linea } en [r, g, b].
+export function grabarMar(canvas, dem, { mar: c, escala, unidad }) {
   const { W, datos, ax, ay } = dem;
   const w = canvas.width, h = canvas.height;
   const ctx = canvas.getContext('2d');
@@ -85,7 +75,6 @@ export function grabarMar(canvas, dem, { rampa, escala, unidad }) {
     }
   }
   const dist = distanciaACosta(esMar, w, h);
-  const c = MAR[rampa] || MAR.noche;
   const lineas = [];
   let p = 3;
   for (let n = 0; n < 9; n++) { lineas.push(p); p += 3.6 + n * 1.9; }
@@ -111,20 +100,20 @@ export function grabarMar(canvas, dem, { rampa, escala, unidad }) {
 }
 
 // Grano de tinta y viñeta leve: la plancha no es un degradado digital.
-export function grabarGrano(canvas, { rampa }) {
+export function grabarGrano(canvas, { claro }) {
   const w = canvas.width, h = canvas.height;
   const ctx = canvas.getContext('2d');
   const img = ctx.getImageData(0, 0, w, h);
   const px = img.data;
   let s = 987654321;
-  const fuerza = rampa === 'papel' ? 5 : 7;
+  const fuerza = claro ? 5 : 7;
   for (let y = 0; y < h; y++) {
     const vy = (y / h - 0.5) * 2;
     for (let x = 0; x < w; x++) {
       s = (s * 1103515245 + 12345) & 0x7fffffff;
       const n = ((s >> 16) & 255) / 255 - 0.5;
       const vx = (x / w - 0.5) * 2;
-      const v = rampa === 'papel' ? 1 : 1 - 0.17 * Math.max(0, vx * vx + vy * vy - 0.5);
+      const v = claro ? 1 : 1 - 0.17 * Math.max(0, vx * vx + vy * vy - 0.5);
       const i = (y * w + x) * 4;
       px[i] = px[i] * v + n * fuerza;
       px[i + 1] = px[i + 1] * v + n * fuerza;

@@ -2,11 +2,12 @@
 // relieve a su paso y enciende cada especie en el punto donde alguien la vio. Debajo,
 // el perfil va escribiendo el cuadro. Todo son datos de web/data/tristaina.json.
 
-import { cargarDem, pintarRelieve, lonAX, latAY, RAMPAS } from './terrain.js';
+import { cargarDem, pintarRelieve, lonAX, latAY } from './terrain.js';
 import { cajaDe } from './geo.js';
 import { t, idiomaActual, alCambiarIdioma } from './i18n.js';
 import { grabarCurvas } from './grabado-curvas.js';
 import { dibujarTira, nombreDe, fmt } from './heroe-tira.js';
+import { pinturaHeroe } from './temas.js';
 
 const Z = 12;
 const SEGUNDOS = 64;        // una vuelta a la ruta
@@ -16,14 +17,13 @@ const SEPARACION_AVISOS = 1.7;
 const VIDA_AVISO = 4.2;
 const MAX_AVISOS = 3;
 
-// Plancha: la misma lámina casi sin color, para que solo se lean las curvas de nivel.
-RAMPAS.plancha = ['#061217', '#08171c', '#0a1b21', '#0b1e25', '#0c2128', '#0e242c', '#0f2730', '#112a33', '#122d37'];
-
 const COLOR = {};
+let P = null;
 const leerColores = () => {
+  P = pinturaHeroe();
   const s = getComputedStyle(document.documentElement);
   for (const c of ['plantas', 'herpetos', 'aves', 'mamiferos', 'insectos', 'hongos', 'otros']) COLOR[c] = s.getPropertyValue(`--c-${c}`).trim();
-  COLOR.ruta = s.getPropertyValue('--ruta').trim();
+  COLOR.ruta = s.getPropertyValue('--lam-ruta').trim();
   COLOR.fg = s.getPropertyValue('--fg').trim();
   COLOR.noche = s.getPropertyValue('--noche').trim();
   COLOR.oro = s.getPropertyValue('--oro').trim();
@@ -49,10 +49,10 @@ function reticula(ctx, caja, w, h, proy, dpr) {
   const paso = (caja.nelng - caja.swlng) > 0.08 ? 1 / 30 : 1 / 60; // dos minutos o uno
   ctx.save();
   ctx.scale(dpr, dpr);
-  ctx.strokeStyle = 'rgba(242,234,216,.075)';
+  ctx.strokeStyle = `rgba(${P.hilo},.075)`;
   ctx.lineWidth = 1;
   ctx.font = '500 11px "Alegreya Sans SC", sans-serif';
-  ctx.fillStyle = 'rgba(242,234,216,.55)';
+  ctx.fillStyle = `rgba(${P.hilo},.55)`;
   const grado = (v, a, b) => {
     const g = Math.floor(v + 1e-9), m = Math.round((v - g) * 60);
     return `${g}° ${String(m).padStart(2, '0')}′ ${v >= 0 ? a : b}`;
@@ -63,10 +63,10 @@ function reticula(ctx, caja, w, h, proy, dpr) {
   const medio = [1 / 60, 1 / 120, 1 / 240, 1 / 600, 1 / 1200].find((m) => m * pxGrado < 70);
   for (let n = Math.floor(caja.swlat / medio); n * medio < caja.nelat; n++) {
     const ya = proy(n * medio, caja.swlng)[1], yb = proy((n + 1) * medio, caja.swlng)[1];
-    ctx.fillStyle = n % 2 ? 'rgba(242,234,216,.62)' : 'rgba(8,24,31,.95)';
+    ctx.fillStyle = n % 2 ? `rgba(${P.hilo},.62)` : `rgba(${P.base},.95)`;
     ctx.fillRect(w - 7, yb, 7, ya - yb);
   }
-  ctx.fillStyle = 'rgba(242,234,216,.6)';
+  ctx.fillStyle = `rgba(${P.hilo},.6)`;
   for (let lon = Math.ceil(caja.swlng / paso) * paso; lon < caja.nelng; lon += paso) {
     const [x] = proy(caja.nelat, lon);
     ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
@@ -90,8 +90,8 @@ function escala(ctx, caja, w, y, proy, dpr) {
   const x = w - 34 - largo;
   ctx.save();
   ctx.scale(dpr, dpr);
-  ctx.strokeStyle = 'rgba(242,234,216,.8)';
-  ctx.fillStyle = 'rgba(242,234,216,.8)';
+  ctx.strokeStyle = `rgba(${P.hilo},.8)`;
+  ctx.fillStyle = `rgba(${P.hilo},.8)`;
   ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(x, y - 4); ctx.lineTo(x, y); ctx.lineTo(x + largo, y); ctx.lineTo(x + largo, y - 4); ctx.stroke();
   ctx.fillRect(x, y - 1.5, largo / 2, 3);
@@ -237,7 +237,7 @@ export function iniciarHeroe(datos) {
     c.setTransform(dpr, 0, 0, dpr, 0, 0);
     c.clearRect(0, 0, w, h);
     // Puntos por pasar: solo un rastro.
-    c.fillStyle = 'rgba(242,234,216,.2)';
+    c.fillStyle = `rgba(${P.hilo},.2)`;
     for (let i = siguiente; i < puntosPx.length; i++) {
       c.beginPath(); c.arc(puntosPx[i].x, puntosPx[i].y, 1.3, 0, 7); c.fill();
     }
@@ -254,7 +254,7 @@ export function iniciarHeroe(datos) {
       const [px, py] = posicion(km);
       c.lineTo(px, py);
       c.lineJoin = 'round'; c.lineCap = 'round';
-      c.strokeStyle = 'rgba(8,24,31,.85)'; c.lineWidth = 5; c.stroke();
+      c.strokeStyle = `rgba(${P.casing},.85)`; c.lineWidth = 5; c.stroke();
       c.strokeStyle = COLOR.ruta; c.lineWidth = 2.4; c.stroke();
     }
     estallidos = estallidos.filter((e) => reloj - e.t < 1.2);
@@ -347,20 +347,25 @@ export function iniciarHeroe(datos) {
       if (mio !== version) return;
       const k = base.width / dem.ancho;
       const plancha = document.createElement('canvas');
-      const { intervalo } = pintarRelieve(plancha, dem, { rampa: 'plancha', curvas: false, escala: k });
-      grabarCurvas(plancha, dem, { rampa: 'noche', escala: k, unidad: dpr, intervalo, cota: false });
+      // Plancha: la misma lámina casi sin color, para que solo se lean las curvas de nivel.
+      const { intervalo } = pintarRelieve(plancha, dem, { rampa: P.fondo, claro: P.claro, curvas: false, escala: k });
+      grabarCurvas(plancha, dem, { curvas: P.curvas, escala: k, unidad: dpr, intervalo, cota: false });
       const c = base.getContext('2d');
       c.drawImage(plancha, 0, 0, base.width, base.height);
+      if (P.lavado) { // en los temas claros el sombreado se aclara: las curvas mandan
+        c.fillStyle = `rgba(${P.velo},${P.lavado})`;
+        c.fillRect(0, 0, base.width, base.height);
+      }
       if (!ancho) { // en pantalla pequeña el grabado pesa más: se baja
-        c.fillStyle = 'rgba(11,29,36,.42)';
+        c.fillStyle = `rgba(${P.velo},.42)`;
         c.fillRect(0, 0, base.width, base.height);
       }
       // El grabado se apaga bajo el texto.
       const fin = ancho ? (texto.right + 90) * dpr : (texto.bottom - caja0.top + 30) * dpr;
       const velo = ancho ? c.createLinearGradient(0, 0, fin, 0) : c.createLinearGradient(0, 0, 0, fin);
-      velo.addColorStop(0, 'rgba(11,29,36,.9)');
-      velo.addColorStop(.72, 'rgba(11,29,36,.78)');
-      velo.addColorStop(1, 'rgba(11,29,36,0)');
+      velo.addColorStop(0, `rgba(${P.velo},.9)`);
+      velo.addColorStop(.72, `rgba(${P.velo},.78)`);
+      velo.addColorStop(1, `rgba(${P.velo},0)`);
       c.fillStyle = velo;
       c.fillRect(0, 0, base.width, base.height);
       reticula(c, e.caja, w, h, proy, dpr);
@@ -369,7 +374,7 @@ export function iniciarHeroe(datos) {
       await new Promise((r) => setTimeout(r, 30));
       if (mio !== version) return;
       const lleno = document.createElement('canvas');
-      pintarRelieve(lleno, dem, { rampa: 'noche', curvas: true, escala: k });
+      pintarRelieve(lleno, dem, { rampa: P.rampa, claro: P.claro, curvas: true, escala: k });
       relieve = lleno;
       cuadroDeFrame();
     } catch {

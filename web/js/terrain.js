@@ -127,12 +127,6 @@ export async function cargarDem(caja, anchoPx) {
   return { z, W, H, datos, ax, ay, ancho, alto, aPixel, altura, metrosPx, caja };
 }
 
-// Rampas de la lámina: bajo a alto. La primera es la de pantalla; la segunda, la de papel.
-export const RAMPAS = {
-  noche: ['#08181f', '#0d2b33', '#134348', '#1f5f57', '#3f7f5f', '#8a9a5a', '#cfa94f', '#ecd38a', '#f7ecd2'],
-  papel: ['#dfe9e0', '#cfe0d0', '#bcd5bd', '#cfd9a6', '#e6d893', '#e8c578', '#dba868', '#c98f62', '#b98b78'],
-};
-
 const hexRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 
 function tablaColor(rampa) {
@@ -164,18 +158,18 @@ export function rangoAlturas(dem) {
 }
 
 // Pinta color por altura, sombreado y curvas de nivel con borde suave.
-export function pintarRelieve(canvas, dem, { rampa = 'noche', curvas = true, escala = 1 } = {}) {
+// rampa: colores de bajo a alto (temas.css). claro: sombreado suave y curvas oscuras.
+export function pintarRelieve(canvas, dem, { rampa, claro = false, curvas = true, escala = 1 }) {
   const { W, datos, ax, ay, ancho, alto, metrosPx } = dem;
   const w = Math.round(ancho * escala), h = Math.round(alto * escala);
   canvas.width = w; canvas.height = h;
   const ctx = canvas.getContext('2d');
   const img = ctx.createImageData(w, h);
   const px = img.data;
-  const tabla = tablaColor(RAMPAS[rampa]);
+  const tabla = tablaColor(rampa);
   const { min, max } = rangoAlturas(dem);
   const inv = 1 / Math.max(1, max - min);
   const intervalo = intervaloCurvas(max - min);
-  const claro = rampa === 'papel';
 
   // Luz del noroeste, a 40 grados, como en la cartografía clásica.
   const az = (315 * Math.PI) / 180, alt = (40 * Math.PI) / 180;

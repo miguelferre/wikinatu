@@ -7,13 +7,9 @@
 // Devuelve { resaltar(taxon|null), comoSvg(), destruir() }.
 // Si no caben todas las etiquetas, quedan las primeras: ~24 a 1440 px y ~10 a 375 px.
 
-import { RAMPA_PAPEL, RAMPA_PLANCHA } from './grabado.js';
 import { pasoAltura, pasoKm, repartir } from './analisis.js';
+import { pinturaCuadro, token } from './temas.js';
 
-const TEMAS = {
-  noche: { fondo: '#0b1d24', tinta: '#f2ead8', suave: '#a9b8b4', linea: '#4a6a70', cielo: '#2c4a52', sombra: '#061318', anillo: '#f6efdf' },
-  papel: { fondo: '#ffffff', tinta: '#26363a', suave: '#55666a', linea: '#8c9b98', cielo: '#c3cec9', sombra: '#3c4a44', anillo: '#ffffff' },
-};
 const ANGULO = 55;
 const SENO = Math.sin((ANGULO * Math.PI) / 180), COSENO = Math.cos((ANGULO * Math.PI) / 180);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -26,10 +22,7 @@ function medir(texto, fuente) {
   return medidor.measureText(texto).width;
 }
 
-function colorGrupo(nombre) {
-  const v = getComputedStyle(document.documentElement).getPropertyValue(`--c-${nombre}`).trim();
-  return v || '#7d9440';
-}
+const colorGrupo = (nombre) => token(`c-${nombre}`);
 
 function estilos() {
   if (document.getElementById('cuadro-estilos')) return;
@@ -42,7 +35,7 @@ function estilos() {
 .cuadro .et text { transition: opacity var(--dur-rapida-salida, 60ms) var(--ease-salida, ease); }
 .cuadro.con-foco .et:not(.activa) text, .cuadro.con-foco .et:not(.activa) .guia, .cuadro.con-foco .et:not(.activa) circle { opacity: .28; }
 .cuadro .et.activa .guia { stroke-width: 1.6; }
-.cuadro .et:focus-visible .caja { stroke: var(--oro, #ecd38a); stroke-width: 2; }
+.cuadro .et:focus-visible .caja { stroke: var(--oro); stroke-width: 2; }
 .cuadro .caja { fill: transparent; stroke: none; }`;
   document.head.append(s);
 }
@@ -101,7 +94,7 @@ function fondoCielo(g, t, yCima, yBase) {
 
 function pintar(contenedor, datos, o, W) {
   const { perfil, etiquetas } = datos;
-  const t = TEMAS[o.tema] || TEMAS.noche;
+  const t = pinturaCuadro(o.tema);
   const leyenda = (datos.leyenda && datos.leyenda.length ? datos.leyenda : leyendaDe(etiquetas));
   const g = geometria(W, t);
   const { lista, dosLineas } = preparar(etiquetas, g);
@@ -146,7 +139,7 @@ function pintar(contenedor, datos, o, W) {
   const id = `c${Math.random().toString(36).slice(2, 8)}`;
 
   // Relleno por altitud, con la misma rampa de la lámina.
-  const rampa = o.tema === 'papel' ? RAMPA_PAPEL : RAMPA_PLANCHA;
+  const { rampa } = t;
   const stops = [...rampa].reverse().map((c, i) => `<stop offset="${(i / (rampa.length - 1)).toFixed(3)}" stop-color="${c}"/>`).join('');
 
   // Estratos: la cresta repetida hacia abajo, cada vez más plana.

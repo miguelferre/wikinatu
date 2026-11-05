@@ -3,34 +3,26 @@
 // crearLamina(contenedor, { puntos, nombre }, opciones) es asíncrona.
 // opciones: aspecto, rampa 'noche'|'papel', marco, animarRuta,
 //   alAvanzar(fraccion), alPulsar(taxon), alResaltar(taxon|null), densidad, escala.
-// Devuelve: dem, ponerObservaciones(obs), resaltar(taxon|null), lienzoComoImagen(tipo, calidad), destruir().
+// Devuelve: dem, ponerObservaciones(obs), resaltar(taxon|null), atenuar(si), lienzoComoImagen(tipo, calidad), destruir().
 // Además: progresoRuta(f) dibuja la ruta hasta la fracción f, pausar(), reanudar(),
 //   proyectar(lat, lon) da [x, y] en px CSS del contenedor, esquinaLibre() da 'ne'|'nw'|'se'|'sw',
 //   rango { min, max, intervalo } del relieve.
 // obs: [{ lat, lon, taxon, color, nombre? }]. Sin textos con idioma: solo cifras, grados, N y km.
 
 import { acumulado, cajaDe } from './geo.js';
-import { RAMPAS, cajaLamina, cargarDem, latAY, lonAX, pintarRelieve } from './terrain.js';
-import { RAMPA_PAPEL, RAMPA_PLANCHA, grabarGrano, grabarMar, separarMar } from './grabado.js';
+import { cajaLamina, cargarDem, latAY, lonAX, pintarRelieve } from './terrain.js';
+import { grabarGrano, grabarMar, separarMar } from './grabado.js';
 import { grabarCurvas } from './grabado-curvas.js';
 import { dibujarMarco } from './lamina-marco.js';
-
-const TEMAS = {
-  noche: { fondo: '#0b1d24', tinta: '#f2ead8', suave: '#a9b8b4', halo: 'rgba(7,20,26,.82)', casing: '#07161c', anillo: '#f6efdf', blanco: '#f2ead8' },
-  papel: { fondo: '#fdfbf5', tinta: '#26363a', suave: '#55666a', halo: 'rgba(253,251,245,.88)', casing: '#fdfbf5', anillo: '#ffffff', blanco: '#fdfbf5' },
-};
+import { pinturaLamina, token } from './temas.js';
 
 const reducido = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 let colores = null;
 function color(nombre) {
   if (!colores) {
-    const css = getComputedStyle(document.documentElement);
     colores = {};
-    for (const c of ['plantas', 'herpetos', 'aves', 'mamiferos', 'insectos', 'hongos', 'otros']) {
-      colores[c] = css.getPropertyValue(`--c-${c}`).trim() || '#7d9440';
-    }
-    colores.ruta = css.getPropertyValue('--ruta').trim() || '#ff7a59';
+    for (const c of ['plantas', 'herpetos', 'aves', 'mamiferos', 'insectos', 'hongos', 'otros']) colores[c] = token(`c-${c}`);
   }
   return colores[nombre] || colores.otros;
 }
@@ -46,7 +38,7 @@ function estilos() {
 .lamina .sobre { inset: 0; width: 100%; height: 100%; }
 .lamina.llena canvas { inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .lamina-rotulo { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 3; max-width: 240px;
-  padding: 3px 8px 4px; background: var(--noche, #0b1d24); color: var(--fg, #f2ead8); border: 1px solid var(--linea-2, #4a6a70);
+  padding: 3px 8px 4px; background: var(--noche); color: var(--fg); border: 1px solid var(--linea-2);
   font: 500 15px/1.2 var(--display, serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   transition: opacity var(--dur-rapida-salida, 60ms) var(--ease-salida, ease); }
 .lamina-rotulo[hidden] { display: block !important; opacity: 0; visibility: hidden; }`;
@@ -80,7 +72,7 @@ function esquinas(geo, ruta) {
 export async function crearLamina(contenedor, { puntos, nombre }, opciones = {}) {
   const o = { aspecto: null, rampa: 'noche', marco: true, animarRuta: false, ...opciones };
   estilos();
-  const tema = TEMAS[o.rampa] || TEMAS.noche;
+  const tema = pinturaLamina(o.rampa);
   const caja0 = contenedor.getBoundingClientRect();
   const W = caja0.width > 40 ? caja0.width : 1200;
   const llena = !o.marco && caja0.height > 40;
@@ -126,22 +118,20 @@ export async function crearLamina(contenedor, { puntos, nombre }, opciones = {})
     const techo = Math.sqrt(3.4e6 / (dem.ancho * dem.alto));
     const escala = o.escala || Math.max(1, Math.min(12, techo, (geo.iw * densidad) / dem.ancho));
     base.getContext('2d', { willReadFrequently: true });
+    // El pintado bloquea el hilo: antes hay que dejar que el aviso de carga llegue a la pantalla.
+    await new Promise((r) => setTimeout(r, 30));
     const { dem: seco, hayMar } = separarMar(dem);
-    // pintarRelieve lee RAMPAS por nombre: el cambio dura solo esta llamada síncrona.
-    const original = { noche: RAMPAS.noche, papel: RAMPAS.papel };
-    Object.assign(RAMPAS, { noche: RAMPA_PLANCHA, papel: RAMPA_PAPEL });
-    rango = pintarRelieve(base, seco, { rampa: o.rampa, curvas: false, escala });
-    Object.assign(RAMPAS, original);
+    rango = pintarRelieve(base, seco, { rampa: tema.rampa, claro: tema.claro, curvas: false, escala });
     // Unidad: cuántos píxeles de lienzo vale un píxel CSS de la plancha.
     const unidad = base.width / geo.iw;
-    if (hayMar) grabarMar(base, dem, { rampa: o.rampa, escala, unidad });
+    if (hayMar) grabarMar(base, dem, { mar: tema.mar, escala, unidad });
     await document.fonts?.load('italic 500 12px Alegreya').catch(() => {});
-    grabarCurvas(base, seco, { rampa: o.rampa, escala, unidad, intervalo: rango.intervalo, cota: o.marco });
-    grabarGrano(base, { rampa: o.rampa });
+    grabarCurvas(base, seco, { curvas: tema.curvas, escala, unidad, intervalo: rango.intervalo, cota: o.marco });
+    grabarGrano(base, { claro: tema.claro });
   } else {
     base.width = 8; base.height = 8;
     const c = base.getContext('2d');
-    c.fillStyle = o.rampa === 'papel' ? '#eef0e8' : '#10262e';
+    c.fillStyle = tema.vacio;
     c.fillRect(0, 0, 8, 8);
   }
 
@@ -158,13 +148,11 @@ export async function crearLamina(contenedor, { puntos, nombre }, opciones = {})
   let obs = [];
   let marcas = [];
   let foco = null;
+  let tenue = false;
   let progreso = o.animarRuta && !reducido() ? 0 : 1;
   const estado = { vivo: true, raf: 0, pausado: false };
   const cancela = new AbortController();
   const fuentesListas = document.fonts?.ready ?? Promise.resolve();
-
-  // Sobre papel el coral se pierde: la misma ruta va en un rojo de imprenta.
-  const tinta = () => (o.rampa === 'papel' ? '#c8341a' : color('ruta'));
 
   const trazarRuta = (ctx, f) => {
     const n = Math.max(2, Math.ceil(ruta.length * f));
@@ -192,7 +180,7 @@ export async function crearLamina(contenedor, { puntos, nombre }, opciones = {})
     trazarRuta(ctx, progreso);
     ctx.strokeStyle = tema.casing; ctx.lineWidth = 5.4 * u; ctx.globalAlpha = 0.86; ctx.stroke();
     ctx.globalAlpha = 1;
-    ctx.strokeStyle = tinta(); ctx.lineWidth = 2.5 * u; ctx.stroke();
+    ctx.strokeStyle = tema.ruta; ctx.lineWidth = 2.5 * u; ctx.stroke();
     if (progreso < 1) return;
     // Hitos de km: enlazan la lámina con el eje del cuadro.
     ctx.font = `600 ${11 * u}px Alegreya, serif`;
@@ -215,7 +203,7 @@ export async function crearLamina(contenedor, { puntos, nombre }, opciones = {})
     ctx.fillStyle = tema.casing; ctx.fill();
     ctx.lineWidth = 2 * u; ctx.strokeStyle = tema.blanco; ctx.stroke();
     ctx.beginPath(); ctx.arc(ini[0], ini[1], 6 * u, 0, 7);
-    ctx.fillStyle = tinta(); ctx.fill();
+    ctx.fillStyle = tema.ruta; ctx.fill();
     ctx.lineWidth = 1.8 * u; ctx.strokeStyle = tema.blanco; ctx.stroke();
   }
 
@@ -224,7 +212,7 @@ export async function crearLamina(contenedor, { puntos, nombre }, opciones = {})
     const anillo = 1.5 * u;
     for (const m of marcas) {
       if (foco != null && m.taxon === foco) continue;
-      ctx.globalAlpha = foco != null ? 0.22 : 1;
+      ctx.globalAlpha = foco != null ? 0.22 : tenue ? 0.34 : 1;
       ctx.beginPath(); ctx.arc(m.x, m.y, r, 0, 7);
       ctx.fillStyle = color(m.color); ctx.fill();
       if (foco == null) { ctx.lineWidth = anillo; ctx.strokeStyle = tema.anillo; ctx.stroke(); }
@@ -330,6 +318,12 @@ export async function crearLamina(contenedor, { puntos, nombre }, opciones = {})
         const [x, y] = aPlancha(p.lat, p.lon);
         return { ...p, x, y };
       }).filter((m) => m.x >= M && m.x <= M + geo.iw && m.y >= M && m.y <= M + geo.ih);
+      redibujar();
+    },
+    // Puntos de una consulta que se está repitiendo.
+    atenuar(si) {
+      if (tenue === !!si) return;
+      tenue = !!si;
       redibujar();
     },
     resaltar(taxon) {

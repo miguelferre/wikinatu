@@ -228,25 +228,25 @@ canvas { display: block; }
 .guia-paginas { position: relative; height: clamp(420px, 42vw, 560px); }
 .pagina {
   position: absolute; width: min(56%, 300px); aspect-ratio: 148 / 210; overflow: hidden;
-  background: #fdfbf5; color: #26363a; padding: 14px; font: 400 .72rem/1.3 var(--text);
+  background: var(--p-papel); color: var(--p-tinta); padding: 14px; font: 400 .72rem/1.3 var(--text);
   outline: 1px solid var(--linea-2);
 }
 .pagina-portada { left: 0; top: 8%; transform: rotate(-3deg); z-index: 3; }
 .pagina-cuadro { left: 24%; top: 0; z-index: 1; transform: rotate(1.4deg); }
 .pagina-especies { right: 0; top: 11%; transform: rotate(3deg); z-index: 2; }
-.pag-lamina { outline: 1px solid #c3cec9; }
+.pag-lamina { outline: 1px solid var(--p-marco); }
 .pag-titulo { margin-top: 12px; }
-.pag-titulo small { font: 500 .78rem/1 var(--versal); letter-spacing: .06em; color: #55666a; }
+.pag-titulo small { font: 500 .78rem/1 var(--versal); letter-spacing: .06em; color: var(--p-suave); }
 .pag-titulo h4 { font-size: 1.5rem; line-height: 1.05; margin: 4px 0 6px; }
 .pag-titulo p { margin: 0; font-size: .8rem; }
 .pagina-cuadro svg { display: block; width: 100%; height: auto; }
 .pagina-especies h4 { font-size: 1.08rem; margin-bottom: 8px; }
-.pag-especie { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 8px; padding: 6px 0; border-top: 1px solid #d9dfda; }
-.pag-especie img { width: 44px; height: 44px; object-fit: cover; display: block; background: #e6e9e2; }
+.pag-especie { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 8px; padding: 6px 0; border-top: 1px solid var(--p-raya); }
+.pag-especie img { width: 44px; height: 44px; object-fit: cover; display: block; background: var(--p-hueco); }
 .pag-especie b, .pag-especie i, .pag-especie small { display: block; }
 .pag-especie b { font: 500 .86rem/1.1 var(--display); }
-.pag-especie i { font-size: .74rem; color: #55666a; }
-.pag-especie small { font-size: .6rem; line-height: 1.2; color: #55666a; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.pag-especie i { font-size: .74rem; color: var(--p-suave); }
+.pag-especie small { font-size: .6rem; line-height: 1.2; color: var(--p-suave); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
 /* V. Método */
 .metodo-lista { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px clamp(20px, 4vw, 56px); margin: 0; }

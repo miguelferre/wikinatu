@@ -5,6 +5,7 @@ import { crearLamina } from './lamina.js';
 import { dibujarCuadro } from './cuadro.js';
 import { autorCorto, elegirEtiquetas, nombreVisible } from './analisis.js';
 import { S, fechaTexto, formato, ventanaTexto } from './visor.js';
+import { botonGuia } from './carga.js';
 
 const $ = (id) => document.getElementById(id);
 const COLORES = ['plantas', 'aves', 'insectos', 'hongos', 'mamiferos', 'herpetos', 'otros'];
@@ -182,6 +183,8 @@ export async function descargarGuia() {
   const estado = $('estado');
   const antes = estado.textContent;
   boton.disabled = true;
+  S.guiaOcupada = true;
+  botonGuia(true);
   estado.textContent = t('g_preparando');
   const titulo = document.title;
   try {
@@ -195,5 +198,7 @@ export async function descargarGuia() {
     window.print();
   } finally {
     boton.disabled = false;
+    S.guiaOcupada = false;
+    botonGuia(false);
   }
 }

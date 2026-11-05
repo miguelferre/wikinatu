@@ -92,7 +92,25 @@ function pintarGrupos() {
   caja.replaceChildren(boton(null, t('todos'), estado.filas.length, null), ...grupos.map((g) => boton(g.id, t(`g_${g.id}`), g.n, g.color)));
 }
 
+// Sitio de la lista mientras llega la primera respuesta: nunca «0 especies» ni un hueco.
+function fantasmas() {
+  return Array.from({ length: 8 }, () => {
+    const li = el('li', 'especie fantasma');
+    li.setAttribute('aria-hidden', 'true');
+    return li;
+  });
+}
+
 function pintar() {
+  const hay = estado.filas.length > 0;
+  $('filtroGrupos').hidden = !hay;
+  if (!hay && !S.completa) {
+    $('especies').replaceChildren(...(S.fallo ? [] : fantasmas()));
+    $('btnMas').hidden = true;
+    $('inventarioFin').textContent = '';
+    $('inventarioNota').textContent = '';
+    return;
+  }
   pintarGrupos();
   const lista = filtrarInventario(estado.filas, estado);
   const ver = lista.slice(0, estado.visibles);
@@ -101,8 +119,8 @@ function pintar() {
   const mas = $('btnMas');
   mas.hidden = resto <= 0;
   mas.textContent = t('ver_mas', { n: formato(Math.min(TANDA, resto)) });
-  $('inventarioFin').textContent = !lista.length && estado.filas.length ? t('sin_coincidencias')
-    : lista.length ? t('mostrando', { a: formato(ver.length), b: formato(lista.length) }) : '';
+  $('inventarioFin').textContent = !hay ? t('sin_especies', { ventana: ventanaTexto() })
+    : !lista.length ? t('sin_coincidencias') : t('mostrando', { a: formato(ver.length), b: formato(lista.length) });
   const obs = estado.filas.reduce((s, f) => s + f.observaciones, 0);
   $('inventarioNota').textContent = estado.filas.length
     ? t('inventario_nota', { n: formato(estado.filas.length), obs: formato(obs), ventana: ventanaTexto(), m: formato(S.pasilloM) }) : '';

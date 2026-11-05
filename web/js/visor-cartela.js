@@ -12,9 +12,11 @@ const el = (etiqueta, clase, texto) => {
 
 const ORDEN = ['plantas', 'aves', 'insectos', 'hongos', 'mamiferos', 'herpetos', 'otros'];
 
-function fila(dt, dd) {
+function fila(dt, dd, clave = null) {
   const d = el('div');
-  d.append(el('dt', null, dt), el('dd', null, dd));
+  const valor = el('dd', null, dd);
+  if (clave) valor.dataset.c = clave;
+  d.append(el('dt', null, dt), valor);
   return d;
 }
 
@@ -26,7 +28,7 @@ function urlOsm(puntos) {
   return `https://www.openstreetmap.org/#map=${z}/${lat.toFixed(4)}/${lon.toFixed(4)}`;
 }
 
-export function pintarCartela(caja, { nombre, resumen, filas, ventana, puntos, completa, esquina, sinRelieve, formato }) {
+export function pintarCartela(caja, { nombre, resumen, filas, ventana, puntos, esquina, sinRelieve, formato, textoEspecies }) {
   caja.dataset.esquina = esquina;
   const dl = el('dl');
   if (resumen) {
@@ -37,8 +39,8 @@ export function pintarCartela(caja, { nombre, resumen, filas, ventana, puntos, c
       dl.append(fila(t('c_altitud'), t('c_alt_rango', { min: formato(resumen.min), max: formato(resumen.max) })));
     }
   }
-  dl.append(fila(t('c_especies'), completa ? formato(filas.length) : t('c_consultando')));
-  dl.append(fila(t('c_meses'), ventana));
+  dl.append(fila(t('c_especies'), textoEspecies(filas.length), 'especies'));
+  dl.append(fila(t('c_meses'), ventana, 'ventana'));
 
   const clave = el('ul', 'cartela-clave');
   const ruta = el('li');
