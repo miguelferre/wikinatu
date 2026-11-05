@@ -313,7 +313,8 @@ export function iniciarHeroe(datos) {
   }
 
   function actualizarMarcha() {
-    const debe = !enPausa && visible && !document.hidden && !reducido.matches;
+    // Sin ruta montada no hay nada que andar: la portada se ve nada más cargar.
+    const debe = rutaPx.length > 0 && !enPausa && visible && !document.hidden && !reducido.matches;
     if (debe === marcha) return;
     marcha = debe;
     if (marcha) { ultimo = performance.now(); raf = requestAnimationFrame(bucle); } else if (raf) { cancelAnimationFrame(raf); raf = 0; }
