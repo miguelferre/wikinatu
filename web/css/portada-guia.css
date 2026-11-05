@@ -15,9 +15,13 @@
 .pagina-portada { left: 0; top: 8%; transform: rotate(-3deg); z-index: 3; }
 .pagina-cuadro { left: 24%; top: 0; z-index: 1; transform: rotate(1.4deg); }
 .pagina-especies { right: 0; top: 11%; transform: rotate(3deg); z-index: 2; }
-.pag-titulo { margin-top: 12px; }
+.pag-titulo { margin-top: 0; }
+.pag-lamina { margin-top: 10px; }
+.pag-grupos { display: grid; gap: 3px; margin: 10px 0 0; padding: 0; font-size: .66rem; font-weight: 600; line-height: 1.2; list-style: none; }
+.pag-grupos li { display: grid; grid-template-columns: 42% 1fr; align-items: center; gap: 6px; }
+.pag-grupos i { display: block; height: 6px; }
 .pag-titulo small { font: 700 .66rem/1 var(--text); letter-spacing: .12em; text-transform: uppercase; color: var(--p-suave); }
-.pag-titulo h4 { font-size: 1.6rem; line-height: 1.04; margin: 4px 0 6px; }
+.pag-titulo h4 { font-size: 1.75rem; line-height: 1.04; margin: 4px 0 6px; }
 .pag-titulo p { margin: 0; font-size: .8rem; }
 .pagina-cuadro svg { display: block; width: 100%; height: auto; }
 .pagina-especies h4 { font-size: 1.14rem; margin-bottom: 8px; }

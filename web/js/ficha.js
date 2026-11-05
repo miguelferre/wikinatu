@@ -10,6 +10,7 @@ import { nombreLocalEl, urlInat } from './inventario.js';
 const $ = (id) => document.getElementById(id);
 let mini = null;
 let turno = 0;
+let abierta = null;
 
 const el = (etiqueta, clase, texto) => {
   const e = document.createElement(etiqueta);
@@ -73,6 +74,24 @@ function enLaRuta(puntos) {
   };
 }
 
+function pintarFoto(caja, f) {
+  if (!f.foto) { caja.replaceChildren(el('p', 'ficha-sinfoto', t('sin_foto'))); return; }
+  const img = el('img');
+  img.src = f.foto.url; img.alt = nombreVisible(f);
+  const credito = el('p', 'ficha-credito', autorCorto(f.foto.autor));
+  if (f.foto.fuente) {
+    const a = el('a', null, t('f_fuente'));
+    a.href = f.foto.fuente; a.rel = 'noopener'; a.target = '_blank';
+    credito.append(' ', a);
+  }
+  caja.replaceChildren(img, credito);
+}
+
+// La foto llegó con la ficha abierta.
+export function fotoEnFicha(f) {
+  if (abierta === f.id && $('ficha').open) pintarFoto($('ficha').querySelector('.ficha-foto'), f);
+}
+
 function cerrarMini() {
   mini?.destruir();
   mini = null;
@@ -93,13 +112,8 @@ export async function abrirFicha(taxon) {
   cerrar.addEventListener('click', () => d.close());
 
   const izq = el('div', 'ficha-foto');
-  if (f.foto) {
-    const img = el('img');
-    img.src = f.foto.url; img.alt = nombreVisible(f);
-    izq.append(img, el('p', 'ficha-credito', autorCorto(f.foto.autor)));
-  } else {
-    izq.append(el('p', 'ficha-sinfoto', t('sin_foto')));
-  }
+  pintarFoto(izq, f);
+  abierta = f.id;
 
   const der = el('div', 'ficha-datos');
   const grupo = el('p', 'ficha-grupo', t(`g_${f.grupo.id}`));

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>WikiNatu: lo que vive junto a tu camino</title>
 <meta name="description" content="Suelta un GPX y WikiNatu dibuja el cuadro de la naturaleza de tu ruta: relieve, perfil con las especies a su altura, inventario y guía en PDF, con observaciones de iNaturalist.">
-<meta name="theme-color" content="#f3e7cd">
+<meta name="theme-color" content="#14262b">
 <meta property="og:type" content="website">
 <meta property="og:title" content="WikiNatu: lo que vive junto a tu camino">
 <meta property="og:description" content="El cuadro de la naturaleza de tu ruta, al modo de Humboldt, con observaciones de iNaturalist.">
@@ -27,9 +27,10 @@
 <body>
 <a class="skip" href="#recorrido" data-t="saltar">Saltar al contenido</a>
 
-<header class="barra">
+<header class="barra oscuro">
   <a class="marca" href="#arriba" aria-label="WikiNatu">WIKINATU</a>
   <nav class="barra-nav" data-t-aria="nav_etiqueta" aria-label="Secciones">
+    <a href="#para" data-t="nav_para">Para qué sirve</a>
     <a href="#idea" data-t="nav_idea">La idea</a>
     <a href="#lectura" data-t="nav_lectura">Cómo se lee</a>
     <a href="#mes" data-t="nav_mes">Mes y sesgo</a>
@@ -52,7 +53,7 @@
   Lagos de Tristaina, en Andorra: https://visitandorra.com/en/nature--sports/hiking-route-estanys-de-tristaina (consultado el 2026-11-05). -->
 <section class="cartel" id="arriba">
   <div class="cartel-sol"></div>
-  <img class="cartel-logo" src="img/wikinatu.svg" alt="WikiNatu" width="1200" height="513">
+  <img class="cartel-logo" src="img/wikinatu-claro.svg" alt="WikiNatu" width="1200" height="513">
   <img class="cartel-crestas" src="img/crestas.webp" alt="" width="2400" height="1040">
 </section>
 
@@ -81,9 +82,9 @@
   <div class="heroe-avisos" id="heroe-avisos" aria-hidden="true"></div>
 
   <div class="heroe-texto" id="heroe-texto">
-    <p class="antetitulo" data-t="recorrido_ante">La ruta de ejemplo, paso a paso</p>
-    <h2 id="heroe-nombre">Lagos de Tristaina</h2>
-    <p id="heroe-rotulo"></p>
+    <p class="antetitulo" id="heroe-lugar"></p>
+    <h2 id="heroe-nombre"></h2>
+    <p data-t="heroe_explica"></p>
   </div>
 
   <ul class="heroe-tarjetas" id="heroe-tarjetas" data-t-aria="tarjetas_etiqueta" aria-label="Especies"></ul>
@@ -97,13 +98,30 @@
   </div>
 </section>
 
+<!-- Cifras de la web. iNaturalist, consultado el 2026-11-05: 225.318.301 observaciones con grado de investigación
+  (/v1/observations?quality_grade=research) y 499.741 especies (/v1/observations/species_counts). -->
 <section class="datos" id="datos">
-  <div><b class="num" id="dato-km">5,04 km</b><span id="dato-nombre">Lagos de Tristaina</span></div>
-  <div><b class="num" id="dato-desnivel">+228 m</b><span data-t="dato_desnivel">de desnivel</span></div>
-  <div><b class="num" id="dato-especies">189</b><span data-t="dato_especies">especies</span></div>
-  <div><b class="num" id="dato-obs">719</b><span data-t="dato_obs">observaciones</span></div>
+  <div><b class="num" data-t="dato1">225 M</b><span data-t="dato1_t"></span></div>
+  <div><b class="num" data-t="dato2">Casi 500.000</b><span data-t="dato2_t"></span></div>
+  <div><b class="num">12</b><span data-t="dato3_t"></span></div>
+  <div><b class="num">0</b><span data-t="dato4_t"></span></div>
 </section>
 </div>
+
+<!-- Para qué sirve. Cifras de las Hermanas: medidas el 2026-11-05, las mismas de la sección Mes y sesgo. -->
+<section class="seccion para" id="para">
+  <header class="seccion-cabeza">
+    <p class="antetitulo" data-t="para_ante"></p>
+    <h2 data-t="para_titulo"></h2>
+    <p class="seccion-entrada" data-t="para_entrada"></p>
+  </header>
+  <ol class="usos">
+    <li><h3 data-t="uso1_t"></h3><p data-t="uso1"></p></li>
+    <li><h3 data-t="uso2_t"></h3><p data-t-html="uso2"></p></li>
+    <li><h3 data-t="uso3_t"></h3><p data-t="uso3"></p></li>
+    <li><h3 data-t="uso4_t"></h3><p data-t="uso4"></p></li>
+  </ol>
+</section>
 
 <!-- II. La idea.
   Fuentes consultadas el 2026-11-05:

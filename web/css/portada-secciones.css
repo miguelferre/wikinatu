@@ -10,6 +10,15 @@
 .figura figcaption { margin-top: 10px; color: var(--muted); font-size: .9rem; max-width: 62em; }
 .figura figcaption b { color: var(--fg); margin-right: .3em; font-weight: 700; }
 
+/* Para qué sirve */
+.para h2 { font-size: clamp(2.2rem, 1.1rem + 3.8vw, 4.4rem); max-width: 15em; }
+.usos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(18px, 2.6vw, 34px); margin: 0; padding: 0; list-style: none; counter-reset: uso; }
+.usos li { counter-increment: uso; padding-top: 12px; border-top: 3px solid var(--tinta); }
+.usos li::before { content: counter(uso); display: block; color: var(--coral-oscuro); font: 400 2.6rem/1 var(--display); }
+.usos h3 { margin: 8px 0 8px; font-size: 1.5rem; }
+@media (max-width: 980px) { .usos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .usos { grid-template-columns: minmax(0, 1fr); } }
+
 /* I. La idea */
 .idea-texto { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(24px, 5vw, 64px); align-items: start; }
 .idea-grande { font-size: clamp(1.28rem, 1.05rem + .8vw, 1.7rem); font-weight: 500; line-height: 1.34; }

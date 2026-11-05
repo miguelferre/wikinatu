@@ -19,17 +19,35 @@ body > *:not(#guia), .skip { display: none !important; }
 #guia { display: block !important; line-height: 1.32; }
 #guia a { color: inherit; }
 
-/* Portada */
+/* Portada: papel claro, Anton y un solo acento ámbar. Nada empuja el pie a la página 2. */
 .g-portada { display: flex; flex-direction: column; height: 193mm; overflow: hidden; break-after: page; }
-/* Un título largo encoge la lámina: el pie nunca salta a la página 2. */
-.g-lamina { display: block; flex: 0 1 auto; min-height: 0; width: 100%; height: auto; object-fit: contain; }
-.g-portada-pie { display: grid; flex: 0 0 auto; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: start; gap: 6mm; margin-top: 4mm; }
-.g-sup { color: var(--p-acento); font: 700 7pt/1.2 var(--text); letter-spacing: .12em; text-transform: uppercase; }
-.g-titulo { margin-top: 1mm; font: 400 20pt/1.04 var(--display); letter-spacing: .012em; text-transform: uppercase; overflow-wrap: anywhere; }
-.g-ventana { margin-top: .8mm; font: 600 10pt/1.2 var(--text); }
-.g-datos { margin: 0; padding: 1.4mm 2mm; background: var(--ambar); }
-.g-datos div { display: flex; justify-content: space-between; gap: 3mm; font-size: 8.5pt; font-weight: 600; line-height: 1.34; }
-.g-datos dd { margin: 0; font-variant-numeric: lining-nums tabular-nums; }
+.g-cab { display: flex; flex: none; align-items: baseline; justify-content: space-between; padding-bottom: 1.5mm; border-bottom: .75pt solid var(--p-tinta); }
+.g-marca { font: 400 11pt/1 var(--display); letter-spacing: .05em; text-transform: uppercase; }
+.g-sup { color: var(--p-suave); font: 700 7pt/1.2 var(--text); letter-spacing: .14em; text-transform: uppercase; }
+.g-filete { display: block; flex: none; width: 16mm; height: 1.2mm; margin-top: 7mm; background: var(--ambar); }
+.g-titulo { flex: none; max-height: 40mm; margin-top: 3mm; overflow: hidden; font-family: var(--display), var(--cjk); font-weight: 400; line-height: 1.06; letter-spacing: .012em; text-transform: uppercase; overflow-wrap: anywhere; text-wrap: balance; }
+.g-lema { display: flex; flex: none; flex-wrap: wrap; align-items: baseline; gap: 0 5mm; margin-top: 2.4mm; }
+.g-ventana { font: 600 12.5pt/1.2 var(--text); }
+.g-ventana::first-letter { text-transform: uppercase; }
+.g-seleccion { color: var(--p-acento); font: 700 8.5pt/1.2 var(--text); }
+.g-centro { display: grid; flex: none; grid-template-columns: 56mm minmax(0, 1fr); gap: 7mm; margin-top: 6mm; }
+.g-mapa { margin: 0; }
+.g-mapa img { display: block; width: 56mm; height: 56mm; object-fit: cover; }
+.g-mapa figcaption { margin-top: 1.2mm; color: var(--p-suave); font-size: 7pt; font-weight: 500; line-height: 1.2; font-variant-numeric: lining-nums tabular-nums; }
+.g-datos { display: flex; flex-direction: column; justify-content: space-between; height: 56mm; margin: 0; }
+.g-datos div { padding-top: 1.3mm; border-top: .5pt solid var(--p-raya); }
+.g-datos div:first-child { padding-top: 0; border-top: 0; }
+.g-datos dt { color: var(--p-suave); font-size: 7.4pt; font-weight: 600; line-height: 1.2; }
+.g-datos dd { margin: 0; font: 400 17pt/1.2 var(--display); letter-spacing: .015em; font-variant-numeric: lining-nums tabular-nums; }
+.g-barras-caja { flex: none; margin-top: 6mm; }
+.g-sub { margin: 0 0 1.6mm; padding-bottom: 1mm; font: 400 10.5pt/1.2 var(--display); letter-spacing: .03em; text-transform: uppercase; border-bottom: .75pt solid var(--p-tinta); }
+.g-barras { margin: 0; padding: 0; list-style: none; }
+.g-barras li { display: grid; grid-template-columns: 30mm minmax(0, 1fr) 11mm; align-items: center; gap: 2mm; height: 4.3mm; font-size: 8.4pt; font-weight: 600; line-height: 1.25; }
+.g-barra-nombre { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.g-barra-pista { display: block; }
+.g-barra { display: block; height: 2.5mm; }
+.g-barra-n { font-variant-numeric: lining-nums tabular-nums; text-align: right; }
+.g-portada .g-nota { flex: none; margin-top: auto; padding-top: 2mm; }
 .g-nota { margin-top: 2mm; color: var(--p-suave); font-size: 7.5pt; }
 
 /* Títulos */
@@ -48,7 +66,8 @@ body > *:not(#guia), .skip { display: none !important; }
 .g-esp img, .g-sinfoto { display: block; width: 22mm; height: 22mm; object-fit: cover; }
 .g-sinfoto { display: grid; place-items: center; padding: 1mm; color: var(--p-suave); font-size: 6.2pt; line-height: 1.15; text-align: center; background: var(--p-hueco); }
 .g-esp-texto { min-width: 0; }
-.g-esp h4 { font: 400 10pt/1.1 var(--display); letter-spacing: .012em; text-transform: uppercase; }
+/* El relleno guarda dentro de la tarjeta el acento de Anton: si no, asoma en la página anterior. */
+.g-esp h4 { padding-top: .9mm; font: 400 10pt/1.1 var(--display); letter-spacing: .012em; text-transform: uppercase; }
 .g-local { margin-top: .3mm; font-size: 8.5pt; font-weight: 600; line-height: 1.15; }
 .g-cient { margin-top: 0; font: italic 400 8.2pt/1.15 var(--text); color: var(--p-suave); }
 .g-obs { margin-top: .6mm; font-size: 7.6pt; font-weight: 600; font-variant-numeric: lining-nums tabular-nums; }

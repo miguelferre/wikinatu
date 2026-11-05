@@ -342,10 +342,10 @@ export function iniciarHeroe(datos) {
     tarjetas.colocar();
     const techo = cajaTarjetas.getBoundingClientRect().top - caja0.top;
     const caja = document.getElementById('heroe-texto').getBoundingClientRect();
-    const texto = { right: caja.right - caja0.left, bottom: caja.bottom - caja0.top };
+    const texto = { left: caja.left - caja0.left, right: caja.right - caja0.left, bottom: caja.bottom - caja0.top };
     // La ruta va junto al texto o debajo de él: gana el sitio donde se dibuja más grande.
     const alLado = { x0: texto.right + 40, x1: w - 70, y0: 48, y1: techo - 22 };
-    const debajo = { x0: 28, x1: w - 40, y0: texto.bottom + 14, y1: techo - 12 };
+    const debajo = { x0: texto.left + 12, x1: w - 40, y0: texto.bottom + 14, y1: techo - 12 };
     const lado = ancho && encuadrar(ruta, w, h, alLado).k > encuadrar(ruta, w, h, debajo).k;
     const seguro = lado ? alLado : debajo;
     const e = encuadrar(ruta, w, h, seguro);
@@ -393,6 +393,15 @@ export function iniciarHeroe(datos) {
       c.fillStyle = velo;
       c.fillRect(0, 0, base.width, base.height);
       reticula(c, e.caja, w, h, proy, dpr);
+      // Bajo la columna izquierda el grabado sigue, muy suave, y se abre hacia el mapa.
+      if (texto.left > 100) {
+        const lateral = c.createLinearGradient(0, 0, (texto.left + 80) * dpr, 0);
+        lateral.addColorStop(0, `rgba(${P.velo},.86)`);
+        lateral.addColorStop(.7, `rgba(${P.velo},.8)`);
+        lateral.addColorStop(1, `rgba(${P.velo},0)`);
+        c.fillStyle = lateral;
+        c.fillRect(0, 0, base.width, base.height);
+      }
       escala(c, e.caja, w, ancho ? 52 : seguro.y0 + 6, proy, dpr);
       seccion.dataset.estado = 'relieve';
       await new Promise((r) => setTimeout(r, 30));

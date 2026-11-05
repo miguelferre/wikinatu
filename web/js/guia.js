@@ -1,15 +1,18 @@
 // Guía en PDF: monta un documento oculto y llama a window.print(). print.css le da forma A5.
 
 import { t } from './i18n.js';
-import { crearLamina } from './lamina.js';
 import { dibujarCuadro } from './cuadro.js';
 import { autorCorto, elegirEtiquetas, nombreVisible } from './analisis.js';
-import { S, fechaTexto, formato, ventanaTexto } from './visor.js';
+import { puntosDe } from './inat.js';
+import { completarFotos } from './visor-fotos.js';
+import { seleccionGuia } from './guia-filtro.js';
+import { crearPortada } from './guia-portada.js';
+import { PAGINAS_PUNTOS, S, filtrosActuales, fotoNueva, formato, idiomasFotos, observacionesDe, ventanaTexto } from './visor.js';
 import { botonGuia } from './carga.js';
 
 const $ = (id) => document.getElementById(id);
 const COLORES = ['plantas', 'aves', 'insectos', 'hongos', 'mamiferos', 'herpetos', 'otros'];
-const DESTACADAS = 60;
+const CON_PUNTOS = 40;
 
 const el = (etiqueta, clase, texto) => {
   const e = document.createElement(etiqueta);
@@ -20,33 +23,34 @@ const el = (etiqueta, clase, texto) => {
 
 const esCjk = (s) => /[぀-鿿]/.test(s);
 
-function fuera(ancho, alto) {
+function fuera(ancho) {
   const d = el('div');
-  d.style.cssText = `position:fixed;left:-20000px;top:0;width:${ancho}px;${alto ? `height:${alto}px;` : ''}`;
+  d.style.cssText = `position:fixed;left:-20000px;top:0;width:${ancho}px;`;
   document.body.append(d);
   return d;
 }
 
-async function imagenLamina() {
-  // Plancha pequeña a densidad 3: en A5 el texto del marco queda en unos 6 pt.
-  const caja = fuera(760, 900);
-  const l = await crearLamina(caja, { puntos: S.ruta.puntos, nombre: S.ruta.nombre }, { papel: true, densidad: 3, marco: true });
-  l.ponerObservaciones(S.obs);
-  const url = l.lienzoComoImagen('image/jpeg', 0.9);
-  l.destruir();
-  caja.remove();
-  return url;
+// El visor solo trae puntos de sus 40 más vistas: con un filtro hay que pedir los de ese grupo.
+async function puntosGuia(filas, grupos, cancelado) {
+  if (!grupos) return S.obs;
+  const ids = new Set(filas.map((f) => f.id));
+  try {
+    const crudos = await puntosDe(S.caja, filas.slice(0, CON_PUNTOS).map((f) => f.id), filtrosActuales(), PAGINAS_PUNTOS, cancelado);
+    return crudos ? observacionesDe(crudos) : [];
+  } catch {
+    return S.obs.filter((o) => ids.has(o.taxon));
+  }
 }
 
-function svgCuadro() {
+function svgCuadro(filas, obs) {
   const caja = fuera(680);
-  const etiquetas = elegirEtiquetas(S.filas, S.obs, S.perfil, S.proyectar, 24);
+  const etiquetas = elegirEtiquetas(filas, obs, S.perfil, S.proyectar, 24);
   const n = new Map();
-  for (const f of S.filas) n.set(f.grupo.color, (n.get(f.grupo.color) || 0) + 1);
+  for (const f of filas) n.set(f.grupo.color, (n.get(f.grupo.color) || 0) + 1);
   const leyenda = COLORES.filter((c) => n.has(c)).map((c) => ({ color: c, etiqueta: t(`l_${c}`), n: formato(n.get(c)) }));
   const c = dibujarCuadro(caja, { perfil: S.perfil, etiquetas, leyenda }, {
     ancho: 680, altoMontana: 300, titulo: t('g_cuadro'),
-    marcas: S.obs.map((o) => ({ km: S.proyectar(o.lat, o.lon).km, color: o.color })),
+    marcas: obs.map((o) => ({ km: S.proyectar(o.lat, o.lon).km, color: o.color })),
   });
   const svg = c.comoSvg();
   c.destruir();
@@ -54,34 +58,13 @@ function svgCuadro() {
   return svg;
 }
 
-function datos() {
-  const dl = el('dl', 'g-datos');
-  const km = new Intl.NumberFormat(document.documentElement.lang === 'en' ? 'en-GB' : 'es-ES', { maximumFractionDigits: (S.resumen?.km ?? 0) < 10 ? 2 : 1 }).format(S.resumen?.km ?? 0);
-  const filas = [[t('c_distancia'), `${km} km`]];
-  if (S.resumen?.sube != null) {
-    filas.push([t('c_desnivel'), `+${formato(S.resumen.sube)} m`]);
-    filas.push([t('c_altitud'), t('c_alt_rango', { min: formato(S.resumen.min), max: formato(S.resumen.max) })]);
-  }
-  filas.push([t('c_especies'), formato(S.filas.length)]);
-  for (const [a, b] of filas) {
-    const d = el('div');
-    d.append(el('dt', null, a), el('dd', null, b));
-    dl.append(d);
-  }
-  return dl;
-}
-
-function portada(url) {
-  const s = el('section', 'g-portada');
-  const img = el('img', 'g-lamina');
-  img.src = url; img.alt = '';
-  const pie = el('div', 'g-portada-pie');
-  const titulos = el('div');
-  titulos.append(el('p', 'g-sup', `${t('g_titulo_sup')} · WikiNatu`), el('h1', 'g-titulo', S.ruta.nombre), el('p', 'g-ventana', ventanaTexto()));
-  pie.append(titulos, datos());
-  const nota = el('p', 'g-nota', `${t('g_datos_del', { fecha: fechaTexto() })}. ${S.calidad === 'verificable' ? t('g_sin_confirmar') : t('g_investigacion')}`);
-  s.append(img, pie, nota);
-  return s;
+function seccionCuadro(filas, obs) {
+  const c = el('section', 'g-cuadro');
+  c.append(el('h2', 'g-h', t('g_cuadro')));
+  const figura = el('div', 'g-cuadro-svg');
+  figura.innerHTML = svgCuadro(filas, obs);
+  c.append(figura, el('p', 'g-nota', obs.length ? t('cuadro_nota') : t('cuadro_vacio')));
+  return c;
 }
 
 function tarjeta(f) {
@@ -103,9 +86,9 @@ function tarjeta(f) {
   return a;
 }
 
-function destacadas(filas) {
+function destacadas(filas, total) {
   const s = el('section', 'g-especies');
-  s.append(el('h2', 'g-h', t('g_mas_vistas', { n: formato(filas.length) })));
+  s.append(el('h2', 'g-h', t(filas.length === total ? 'g_todas' : 'g_mas_vistas', { n: formato(filas.length) })));
   const grupos = new Map();
   for (const f of filas) {
     if (!grupos.has(f.grupo.id)) grupos.set(f.grupo.id, []);
@@ -141,10 +124,10 @@ function resto(filas) {
   return s;
 }
 
-function cierre() {
+function cierre(conCuadro) {
   const s = el('section', 'g-cierre');
   for (const [titulo, claves] of [
-    ['g_leer', ['g_leer_1', 'g_leer_2', 'g_leer_3']],
+    ['g_leer', ['g_leer_1', ...(conCuadro ? ['g_leer_2'] : []), 'g_leer_3']],
     ['g_limites', ['g_lim_1', 'g_lim_2', 'g_lim_3']],
     ['g_creditos', ['g_cred_1', 'g_cred_2', 'g_cred_3']],
   ]) {
@@ -153,42 +136,52 @@ function cierre() {
   return s;
 }
 
-const esperarImagenes = (raiz) => Promise.all([...raiz.querySelectorAll('img')].map((i) => Promise.race([
-  i.decode().catch(() => {}),
-  new Promise((r) => setTimeout(r, 15000)),
-])));
+// Una foto que no carga no deja un hueco roto en el papel.
+const esperarImagenes = (raiz) => Promise.all([...raiz.querySelectorAll('img')].map(async (i) => {
+  const ok = await Promise.race([
+    i.decode().then(() => true, () => false),
+    new Promise((r) => setTimeout(() => r(null), 15000)),
+  ]);
+  const tarjeta = i.closest('.g-esp');
+  if (ok !== false || !tarjeta) return;
+  tarjeta.querySelector('.g-autor')?.remove();
+  i.replaceWith(el('div', 'g-sinfoto', t('sin_foto')));
+}));
 
-export async function montarGuia() {
+export async function montarGuia(opciones, cancelado = () => false) {
   const g = $('guia');
   g.replaceChildren();
-  const url = await imagenLamina();
-  const partes = [portada(url)];
-  if (S.perfil.some((p) => p.alt != null)) {
-    const c = el('section', 'g-cuadro');
-    c.append(el('h2', 'g-h', t('g_cuadro')));
-    const figura = el('div', 'g-cuadro-svg');
-    figura.innerHTML = svgCuadro();
-    c.append(figura, el('p', 'g-nota', t('cuadro_nota')));
-    partes.push(c);
-  }
-  partes.push(destacadas(S.filas.slice(0, DESTACADAS)));
-  if (S.filas.length > DESTACADAS) partes.push(resto(S.filas.slice(DESTACADAS)));
-  partes.push(cierre());
+  const sel = seleccionGuia(S.filas, opciones);
+  const conCuadro = opciones.cuadro !== false && S.perfil.some((p) => p.alt != null);
+  const [, obs, cubierta] = await Promise.all([
+    completarFotos(sel.conFoto, { idiomas: idiomasFotos(), cancelado, alCambiar: fotoNueva }),
+    conCuadro ? puntosGuia(sel.filas, opciones.grupos, cancelado) : [],
+    crearPortada(sel.filas, opciones.grupos),
+  ]);
+  if (cancelado()) return;
+  const partes = [cubierta];
+  if (conCuadro) partes.push(seccionCuadro(sel.filas, obs));
+  partes.push(destacadas(sel.conFoto, sel.filas.length));
+  if (sel.resto.length) partes.push(resto(sel.resto));
+  partes.push(cierre(conCuadro));
   g.append(...partes);
   await esperarImagenes(g);
 }
 
-export async function descargarGuia() {
+export async function descargarGuia(opciones) {
   const boton = $('btnGuia');
   const estado = $('estado');
   const antes = estado.textContent;
+  const consulta = S.token;
+  const cancelado = () => consulta !== S.token;
   boton.disabled = true;
   S.guiaOcupada = true;
   botonGuia(true);
   estado.textContent = t('g_preparando');
   const titulo = document.title;
   try {
-    await montarGuia();
+    await montarGuia(opciones, cancelado);
+    if (cancelado()) { estado.textContent = antes; return; }
     document.title = `WikiNatu - ${S.ruta.nombre} - ${ventanaTexto()}`;
     estado.textContent = t('g_lista');
     addEventListener('afterprint', () => {
@@ -197,8 +190,10 @@ export async function descargarGuia() {
     }, { once: true });
     window.print();
   } finally {
-    boton.disabled = false;
+    // Una consulta nueva pudo empezar mientras tanto: el botón espera a que acabe.
+    boton.disabled = !S.carga.final;
     S.guiaOcupada = false;
     botonGuia(false);
+    if (!boton.disabled) boton.focus();
   }
 }

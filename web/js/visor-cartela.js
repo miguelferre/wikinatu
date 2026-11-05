@@ -10,10 +10,26 @@ const el = (etiqueta, clase, texto) => {
   return e;
 };
 
+const CJK = /([\p{sc=Han}\p{sc=Hiragana}\p{sc=Katakana}\p{sc=Hangul}，、。・（）]+)/u;
+
+// Título con tramos en chino o japonés: cada tramo lleva su fuente. Uno corto no se parte,
+// y si abre un título mixto va en su propia línea.
+export function ponerTitulo(e, texto) {
+  const trozos = texto.split(CJK).filter((s) => s.trim());
+  e.replaceChildren(...trozos.map((trozo, i) => {
+    if (!CJK.test(trozo)) return trozo;
+    const s = el('span', 'titulo-cjk', trozo);
+    s.classList.toggle('entero', trozo.length <= 14);
+    s.classList.toggle('linea', i === 0 && trozos.length > 1);
+    return s;
+  }));
+  return e;
+}
+
 const ORDEN = ['plantas', 'aves', 'insectos', 'hongos', 'mamiferos', 'herpetos', 'otros'];
 
-function fila(dt, dd, clave = null) {
-  const d = el('div');
+function fila(dt, dd, clave = null, clase = null) {
+  const d = el('div', clase);
   const valor = el('dd', null, dd);
   if (clave) valor.dataset.c = clave;
   d.append(el('dt', null, dt), valor);
@@ -40,7 +56,7 @@ export function pintarCartela(caja, { nombre, resumen, filas, ventana, puntos, e
     }
   }
   dl.append(fila(t('c_especies'), textoEspecies(filas.length), 'especies'));
-  dl.append(fila(t('c_meses'), ventana, 'ventana'));
+  dl.append(fila(t('c_meses'), ventana, 'ventana', 'cartela-ancha'));
 
   const clave = el('ul', 'cartela-clave');
   const ruta = el('li');
@@ -63,7 +79,7 @@ export function pintarCartela(caja, { nombre, resumen, filas, ventana, puntos, e
   a.target = '_blank';
   pie.append(a);
 
-  const partes = [el('p', 'cartela-sup', t('cartela_sup')), el('p', 'cartela-titulo', nombre), dl, clave];
+  const partes = [el('p', 'cartela-sup', t('cartela_sup')), ponerTitulo(el('p', 'cartela-titulo'), nombre), el('span', 'cartela-filete'), dl, clave];
   if (sinRelieve) partes.push(el('p', 'cartela-pie', t('c_sin_relieve')));
   partes.push(pie);
   caja.replaceChildren(...partes);

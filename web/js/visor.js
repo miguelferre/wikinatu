@@ -11,16 +11,17 @@ import { centroDe, elegirEtiquetas, localeLocal, perfilDe, resumenPerfil, soloEs
 import { iniciarEntrada, olvidar, pintarBarra, rutaInicial } from './visor-rutas.js';
 import { iniciarFiltros, pintarTira } from './visor-filtros.js';
 import { pintarCartela } from './visor-cartela.js';
-import { iniciarInventario, ponerInventario } from './inventario.js';
-import { abrirFicha, iniciarFicha } from './ficha.js';
-import { descargarGuia } from './guia.js';
+import { iniciarInventario, ponerInventario, repintarFoto } from './inventario.js';
+import { abrirFicha, fotoEnFicha, iniciarFicha } from './ficha.js';
+import { abrirDialogoGuia, iniciarDialogoGuia } from './guia-dialogo.js';
+import { aplicarConocidas, completarFotos } from './visor-fotos.js';
 import { especiesCartela, pintarCarga } from './carga.js';
 
 registrar(TEXTOS_VISOR);
 
 const $ = (id) => document.getElementById(id);
 const COLORES = ['plantas', 'aves', 'insectos', 'hongos', 'mamiferos', 'herpetos', 'otros'];
-const PAGINAS_PUNTOS = 6;
+export const PAGINAS_PUNTOS = 6;
 
 // ?mes=7 fija el mes de entrada; sin él, el mes actual.
 function mesInicial() {
@@ -42,6 +43,24 @@ export const formato = (n) => new Intl.NumberFormat(idiomaActual() === 'es' ? 'e
 export const mesesFiltro = () => (S.todoAnio ? null : ventanaMeses(S.mes));
 export const filtrosActuales = () => ({ meses: mesesFiltro(), calidad: S.calidad });
 export const ventanaTexto = () => textoVentana(mesesFiltro(), t('meses'), { todo: t('todo_anio').toLowerCase(), a: idiomaActual() === 'es' ? 'a' : 'to' });
+
+// Idiomas de Wikipedia para el último paso de la cadena de fotos.
+export const idiomasFotos = () => [...new Set(['en', idiomaActual(), localeLocal(S.local, centroDe(S.ruta.puntos))?.split('-')[0]].filter(Boolean))];
+
+// Una fila ha ganado foto en segundo plano: se repinta su tarjeta, no la lista.
+export function fotoNueva(f) {
+  if (S.porId.get(f.id) !== f) return;
+  repintarFoto(f);
+  fotoEnFicha(f);
+}
+
+// Puntos crudos de iNaturalist que caen en el pasillo, con el color y el nombre de su especie.
+export function observacionesDe(crudos) {
+  return crudos.filter((p) => S.tramos.contiene(p.lat, p.lon) && S.porId.has(p.taxon)).map((p) => {
+    const f = S.porId.get(p.taxon);
+    return { lat: p.lat, lon: p.lon, taxon: p.taxon, color: f.grupo.color, nombre: nombreDe(f) };
+  });
+}
 
 function aviso(texto, reintentar = null) {
   const a = $('aviso');
@@ -176,6 +195,7 @@ export async function consultar() {
   S.fecha = new Date();
   S.filas = soloEspecies([...mapa.values()]).map((e) => filaDe(e.taxon, e.count)).sort((a, b) => b.observaciones - a.observaciones);
   S.porId = new Map(S.filas.map((f) => [f.id, f]));
+  aplicarConocidas(S.filas);
   S.obs = [];
   S.completa = true;
   S.carga.parcial = null;
@@ -201,10 +221,7 @@ export async function consultar() {
       pintarCarga();
     });
     if (!crudos || cancelado()) return;
-    S.obs = crudos.filter((p) => S.tramos.contiene(p.lat, p.lon) && S.porId.has(p.taxon)).map((p) => {
-      const f = S.porId.get(p.taxon);
-      return { lat: p.lat, lon: p.lon, taxon: p.taxon, color: f.grupo.color, nombre: nombreDe(f) };
-    });
+    S.obs = observacionesDe(crudos);
   } catch {
     if (cancelado()) return;
     aviso(t('err_puntos'), consultar);
@@ -214,6 +231,8 @@ export async function consultar() {
   ponerPuntosEnLamina();
   pintarCuadroActual();
   pintarCarga();
+  // En segundo plano: comparte la cola de iNaturalist con los nombres, y los puntos ya están.
+  completarFotos(S.filas, { idiomas: idiomasFotos(), cancelado, alCambiar: fotoNueva });
 
   try {
     await nombresLocales(tk, filtros);
@@ -303,7 +322,8 @@ async function arrancar() {
   iniciarFiltros({ alCambiar: consultar, alCambiarLocal: consultar });
   iniciarInventario({ alAbrir: abrirFicha });
   iniciarFicha();
-  $('btnGuia').addEventListener('click', descargarGuia);
+  iniciarDialogoGuia();
+  $('btnGuia').addEventListener('click', abrirDialogoGuia);
   vigilarTamano();
   alCambiarIdioma(() => { pintarTira(); refrescarCartela(); S.lamina?.redibujar(); ponerInventario(S.filas); consultar(); });
   try {

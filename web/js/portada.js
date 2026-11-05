@@ -93,13 +93,8 @@ function textosVivos(datos) {
   }));
   const r = datos.resumen;
   const poner = (id, texto) => { document.getElementById(id).textContent = texto; };
-  poner('heroe-nombre', datos.nombre);
-  poner('heroe-rotulo', t('heroe_rotulo', { km: fmt(r.km, 2), puntos: fmt(datos.puntos.length, 0) }));
-  poner('dato-km', `${fmt(r.km, 2)} km`);
-  poner('dato-nombre', datos.nombre);
-  poner('dato-desnivel', `+${fmt(r.desnivel, 0)} m`);
-  poner('dato-especies', fmt(r.especies, 0));
-  poner('dato-obs', fmt(r.observaciones, 0));
+  poner('heroe-lugar', t('heroe_lugar', { nombre: datos.nombre, km: fmt(r.km, 2) }));
+  poner('heroe-nombre', t('heroe_cabeza', { n: fmt(r.especies, 0) }));
 }
 
 async function arrancar() {

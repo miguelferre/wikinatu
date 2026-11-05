@@ -199,7 +199,9 @@ export function iniciarPaginas(datos) {
   portadaTexto.className = 'pag-titulo';
   const lienzo = document.createElement('div');
   lienzo.className = 'pag-lamina';
-  portada.append(lienzo, portadaTexto);
+  const grupos = document.createElement('ul');
+  grupos.className = 'pag-grupos';
+  portada.append(portadaTexto, lienzo, grupos);
 
   function textos() {
     const nodo = (tag, txt) => { const n = document.createElement(tag); n.textContent = txt; return n; };
@@ -208,6 +210,16 @@ export function iniciarPaginas(datos) {
       nodo('p', t('pag_datos', { km: fmt(datos.resumen.km, 2), especies: fmt(datos.resumen.especies, 0) })),
       nodo('p', t('pag_consulta', { fecha: fechaLarga() })),
     );
+    const cuenta = new Map();
+    for (const e of datos.especies) cuenta.set(e.color, (cuenta.get(e.color) || 0) + 1);
+    const orden = [...cuenta].sort((a, b) => b[1] - a[1]).slice(0, 4);
+    grupos.replaceChildren(...orden.map(([color, n]) => {
+      const li = document.createElement('li');
+      const barra = document.createElement('i');
+      barra.style.cssText = `width:${(n / orden[0][1]) * 100}%;background:var(--c-${color})`;
+      li.append(nodo('span', t(`g_${color}`)), barra);
+      return li;
+    }));
     const lista = datos.especies.filter((e) => e.foto && e.nombre[idiomaActual()]).slice(0, 5);
     pagEspecies.replaceChildren(nodo('h4', t('pag_especies')), ...lista.map(especieFila));
     if (perfil) {
@@ -221,8 +233,7 @@ export function iniciarPaginas(datos) {
 
   textos();
   cuandoCerca(portada, async () => {
-    const lam = await crearLamina(lienzo, { puntos: datos.ruta, nombre: datos.nombre }, { aspecto: 1.05, papel: true, marco: false });
-    lam.ponerObservaciones(observaciones(datos));
+    const lam = await crearLamina(lienzo, { puntos: datos.ruta, nombre: datos.nombre }, { aspecto: 1.7, papel: true, marco: false });
     perfil = perfilReal(lam, datos);
     textos();
   });

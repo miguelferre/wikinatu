@@ -5,6 +5,7 @@ const API = 'https://api.inaturalist.org';
 const INTERVALO_MS = 1050;
 const CACHE = 'wikinatu-v1';
 const CADUCIDAD_MS = 3 * 24 * 3600 * 1000;
+export const LOTE_TAXONES = 30; // tope de /v1/taxa/{ids}
 
 // Identificadores comprobados contra la API el 2026-11-05.
 // El orden importa: gana el primer antecesor que coincide.
@@ -34,16 +35,34 @@ export function grupoDe(taxon) {
   return { id: 'otros', taxon: 0, color: 'otros' };
 }
 
-export function fotoDe(taxon) {
-  const foto = taxon.default_photo;
-  if (!foto || !LICENCIAS_ABIERTAS.has(foto.license_code) || !foto.medium_url) return null;
+// El CC0 de iNaturalist solo nombra al autor en «uploaded by», y esa parte se recorta al enseñarla.
+const atribucion = (f) => (/^no rights reserved/i.test(f.attribution) && f.attribution_name
+  ? `${f.attribution_name}, no rights reserved (${f.license_code.toUpperCase()})` : f.attribution);
+
+// Foto usable: licencia abierta, autor y ningún aviso pendiente. Sin autor no se enseña.
+function fotoAbierta(foto) {
+  if (!foto || !LICENCIAS_ABIERTAS.has(foto.license_code) || !foto.medium_url || !foto.attribution) return null;
+  if (foto.flags?.some((f) => !f.resolved)) return null;
   return {
     url: foto.medium_url,
     pequena: foto.medium_url.replace('/medium.', '/small.'),
-    autor: foto.attribution || '',
+    autor: atribucion(foto),
     licencia: foto.license_code.toUpperCase(),
   };
 }
+
+export const fotoDe = (taxon) => fotoAbierta(taxon.default_photo);
+
+// Segundo paso de la cadena: la primera foto abierta del taxón, en el orden de iNaturalist.
+export function fotoDeTaxon(taxon) {
+  for (const foto of [taxon.default_photo, ...(taxon.taxon_photos || []).map((p) => p.photo)]) {
+    const f = fotoAbierta(foto);
+    if (f) return f;
+  }
+  return null;
+}
+
+const urlWikipedia = (url) => (url ? url.replace(/^http:/, 'https:').replace(/ /g, '_') : null);
 
 export function filaDe(taxon, count) {
   return {
@@ -56,7 +75,7 @@ export function filaDe(taxon, count) {
     grupo: grupoDe(taxon),
     observaciones: count,
     foto: fotoDe(taxon),
-    wikipedia: taxon.wikipedia_url ? taxon.wikipedia_url.replace(/^http:/, 'https:') : null,
+    wikipedia: urlWikipedia(taxon.wikipedia_url),
   };
 }
 
@@ -64,7 +83,7 @@ let ultima = 0;
 let cola = Promise.resolve();
 const espera = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function leerCache(url) {
+export async function leerCache(url) {
   try {
     const c = await caches.open(CACHE);
     const r = await c.match(url);
@@ -74,7 +93,7 @@ async function leerCache(url) {
   } catch { return null; }
 }
 
-async function guardarCache(url, texto) {
+export async function guardarCache(url, texto) {
   try {
     const c = await caches.open(CACHE);
     await c.put(url, new Response(texto, { headers: { 'content-type': 'application/json', 'x-guardado': String(Date.now()) } }));
@@ -99,7 +118,8 @@ async function pedirRed(url) {
 }
 
 function pedir(ruta, params) {
-  const url = `${API}${ruta}?${new URLSearchParams(params)}`;
+  const q = new URLSearchParams(params).toString();
+  const url = `${API}${ruta}${q ? `?${q}` : ''}`;
   const tarea = cola.then(async () => (await leerCache(url)) || pedirRed(url));
   cola = tarea.catch(() => {});
   return tarea;
@@ -134,6 +154,12 @@ export async function contarEspecies(tramos, filtros, locale, alAvanzar, cancela
     alAvanzar?.(hechas, tramos.length, total);
   }
   return total;
+}
+
+// Ficha completa de hasta LOTE_TAXONES especies, con taxon_photos y wikipedia_url.
+export async function taxones(ids) {
+  const d = await pedir(`/v1/taxa/${ids.join(',')}`, {});
+  return (d.results || []).map((t) => ({ ...t, wikipedia_url: urlWikipedia(t.wikipedia_url) }));
 }
 
 // Puntos reales de una lista de especies, con sus coordenadas públicas.

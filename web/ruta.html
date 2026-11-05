@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="css/visor.css">
 <link rel="stylesheet" href="css/visor-listas.css">
 <link rel="stylesheet" href="css/visor-carga.css">
+<link rel="stylesheet" href="css/visor-guia.css">
 <link rel="stylesheet" href="css/print.css" media="print">
 <script type="module" src="js/visor.js"></script>
 </head>
@@ -27,7 +28,7 @@
   <div class="cabecera-acciones">
     <button id="btnGpx" class="boton" type="button" data-t="anadir_gpx">Añadir GPX</button>
     <input id="fichero" type="file" accept=".gpx,application/gpx+xml" multiple hidden>
-    <button id="btnGuia" class="boton boton-principal" type="button" data-t="descargar_guia" disabled>Descargar guía</button>
+    <button id="btnGuia" class="boton boton-principal" type="button" aria-haspopup="dialog" data-t="descargar_guia" disabled>Descargar guía</button>
     <div class="idioma" role="group" data-t-aria="idioma_aria" aria-label="Idioma">
       <button type="button" data-lang="es">ES</button><button type="button" data-lang="en">EN</button>
     </div>
@@ -127,6 +128,37 @@
 </footer>
 
 <dialog class="ficha" id="ficha" aria-labelledby="fichaNombre"></dialog>
+
+<dialog class="dg" id="dialogoGuia" aria-labelledby="guiaTitulo">
+  <form id="guiaForm" class="dg-form">
+    <header class="dg-cabeza">
+      <p class="dg-sup" data-t="gd_sup">Antes de imprimir</p>
+      <h2 id="guiaTitulo" data-t="gd_titulo">Elige qué lleva tu guía</h2>
+      <button id="guiaCerrar" class="ficha-cerrar" type="button" data-t-aria="cerrar" aria-label="Cerrar"><svg viewBox="0 0 14 14" width="14" height="14" aria-hidden="true"><path d="M2 2l10 10M12 2 2 12" stroke="currentColor" stroke-width="1.4"/></svg></button>
+    </header>
+    <div class="dg-cuerpo">
+      <fieldset class="dg-bloque">
+        <legend data-t="gd_grupos">Grupos</legend>
+        <div class="dg-atajos" id="guiaAtajos" role="group" data-t-aria="gd_atajos" aria-label="Atajos de grupos"></div>
+        <div class="dg-casillas" id="guiaGrupos"></div>
+      </fieldset>
+      <fieldset class="dg-bloque">
+        <legend data-t="gd_fotos">Especies con foto</legend>
+        <div class="dg-opciones" id="guiaFotosOpciones"></div>
+      </fieldset>
+      <fieldset class="dg-bloque">
+        <legend data-t="gd_partes">Partes</legend>
+        <label class="dg-casilla"><input id="guiaCuadro" type="checkbox"><span class="dg-nombre" data-t="gd_cuadro">Cuadro de la naturaleza</span></label>
+        <p class="dg-nota" id="guiaCuadroNota" data-t="cuadro_sin_dem" hidden></p>
+        <label class="dg-casilla"><input id="guiaResto" type="checkbox"><span class="dg-nombre" data-t="gd_resto">Lista compacta del resto</span><span class="dg-n" id="guiaRestoN"></span></label>
+      </fieldset>
+    </div>
+    <footer class="dg-pie">
+      <p class="dg-cuenta" id="guiaCuenta" role="status" aria-live="polite"></p>
+      <button id="guiaCrear" class="boton boton-principal" type="submit" data-t="gd_crear">Crear guía</button>
+    </footer>
+  </form>
+</dialog>
 
 <div class="soltar" id="soltar" hidden><p data-t="soltar">Suelta el GPX para abrir la ruta</p></div>
 <div id="guia" class="guia"></div>

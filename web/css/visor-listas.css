@@ -61,7 +61,7 @@
 .barra-mes { color: var(--muted); font: 600 .78rem/16px var(--text); }
 .barras .marcado .barra { background: var(--ambar); }
 .barras .marcado .barra-mes { color: var(--fg); }
-.ficha-mini { position: relative; margin-top: 6px; border: 4px solid var(--ambar); }
+.ficha-mini { position: relative; margin-top: 6px; border: 1px solid var(--linea-2); }
 .ficha-nota { margin-top: 4px; color: var(--muted); font-size: .9rem; }
 .ficha-enlaces { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; font-size: .98rem; }
 

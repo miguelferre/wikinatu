@@ -28,6 +28,13 @@
 .especies, .cuadro-caja { transition: opacity var(--dur-media-salida) var(--ease-salida); }
 .especie.fantasma { min-height: 250px; background: var(--papel-2); }
 
+/* Cartela en consulta: las cifras pasan a secundario y un hilo fino late sobre el papel. */
+.cartela::before { content: ""; position: absolute; inset: 0 0 auto; height: 3px; background: var(--ambar); transform: scaleX(0); transform-origin: left; }
+.cartela.actualizando::before { animation: cartela-latido 1.8s var(--ease-entrada) infinite; }
+.cartela.actualizando dd { color: var(--muted); }
+.cartela.actualizando [data-c="especies"] { font: 600 1rem/1.45 var(--text); letter-spacing: 0; }
+@keyframes cartela-latido { 0% { transform: scaleX(0); } 60%, 100% { transform: scaleX(1); opacity: 0; } }
+
 /* El botón desactivado cambia de aspecto tarde: lo que sale de caché no lo hace parpadear. */
 #btnGuia { display: inline-grid; }
 #btnGuia::after { content: attr(data-ancho); height: 0; overflow: hidden; visibility: hidden; }

@@ -29,6 +29,7 @@ export function nombreLocalEl(f) {
 
 function tarjeta(f, i) {
   const li = el('li', `especie${f.foto ? '' : ' sin-foto'}`);
+  li.dataset.id = f.id;
   const num = el('span', 'esp-num', String(i + 1).padStart(3, '0'));
   if (f.foto) {
     const b = el('button', 'esp-abrir');
@@ -131,6 +132,19 @@ export function ponerInventario(filas) {
   estado.visibles = TANDA;
   if (estado.grupo && !filas.some((f) => f.grupo.id === estado.grupo)) estado.grupo = null;
   pintar();
+}
+
+// Filtro de grupo activo: el diálogo de la guía abre con él.
+export const grupoActivo = () => estado.grupo;
+
+// Llega una foto en segundo plano: cambia esa tarjeta y nada más. Ni tanda, ni scroll, ni foco.
+export function repintarFoto(f) {
+  const vieja = $('especies').querySelector(`[data-id="${f.id}"]`);
+  if (!vieja) return;
+  const conFoco = vieja.contains(document.activeElement);
+  const nueva = tarjeta(f, estado.filas.indexOf(f));
+  vieja.replaceWith(nueva);
+  if (conFoco) nueva.querySelector('.esp-titulo').focus();
 }
 
 export function iniciarInventario({ alAbrir }) {
