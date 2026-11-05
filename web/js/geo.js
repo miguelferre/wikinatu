@@ -38,7 +38,7 @@ export function leerGpx(texto, nombreFichero = '') {
 
   const trk = texto.match(/<trk\b[\s\S]*?<name>([\s\S]*?)<\/name>/);
   const meta = texto.match(/<metadata\b[\s\S]*?<name>([\s\S]*?)<\/name>/);
-  const crudo = limpiar((trk || meta || [])[1] || '').replace(/\s*[-–|]\s*wikiloc.*$/i, '');
+  const crudo = limpiar((trk || meta || [])[1] || '').replace(/\s*[-–|]\s*wikiloc.*$/i, '');
   const nombre = crudo || nombreFichero.replace(/\.gpx$/i, '') || 'Ruta';
   return { nombre, puntos };
 }
