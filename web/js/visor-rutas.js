@@ -28,7 +28,7 @@ function escribir(lista) {
 const idDe = (nombre, p) => `${nombre}|${p.length}|${p[0][0]},${p[0][1]}`;
 
 export function aRuta(guardada) {
-  return { id: guardada.id, nombre: guardada.nombre, puntos: guardada.p.map(([lat, lon]) => ({ lat, lon, ele: null })) };
+  return { id: guardada.id, nombre: guardada.nombre, puntos: guardada.p.map(([lat, lon, ele]) => ({ lat, lon, ele: ele ?? null })) };
 }
 
 // Convierte un GPX en ruta y la deja en la barra. Lanza 'gpx_vacio' si no vale.
@@ -40,7 +40,7 @@ export function rutaDesdeGpx(texto, nombreFichero, { recordar = true } = {}) {
   const kmTotal = validos.length ? acumulado(validos).at(-1) : 0;
   const limpios = simplificar(validos, Math.max(0.002, kmTotal / 3000));
   if (limpios.length < 2) throw new Error('gpx_vacio');
-  const p = limpios.map((q) => [redondear(q.lat), redondear(q.lon)]);
+  const p = limpios.map((q) => (q.ele == null ? [redondear(q.lat), redondear(q.lon)] : [redondear(q.lat), redondear(q.lon), Math.round(q.ele)]));
   const ruta = { id: idDe(nombre, p), nombre, p };
   if (recordar) {
     const lista = leerGuardadas().filter((r) => r.id !== ruta.id);

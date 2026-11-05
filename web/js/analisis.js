@@ -45,9 +45,23 @@ export function mediana(valores) {
   return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2;
 }
 
-// Perfil de la ruta a paso regular, con altitud del modelo. Los huecos toman el valor vecino.
+// Media móvil corta: el GPS salta unos metros de un punto a otro.
+function suavizarAltitud(puntos, radio = 3) {
+  return puntos.map((_, i) => {
+    let s = 0, n = 0;
+    for (let k = Math.max(0, i - radio); k <= Math.min(puntos.length - 1, i + radio); k++) {
+      if (puntos[k].ele != null) { s += puntos[k].ele; n += 1; }
+    }
+    return n ? s / n : null;
+  });
+}
+
+// Perfil de la ruta a paso regular. Manda la altitud del GPX: el modelo mide la montaña
+// sobre un túnel o un puente. Sin ella, se usa el modelo. Los huecos toman el valor vecino.
 export function perfilDe(puntos, altura, muestras = 420) {
   const km = acumulado(puntos);
+  const conEle = puntos.filter((p) => p.ele != null).length >= puntos.length * 0.8;
+  const eles = conEle ? suavizarAltitud(puntos) : null;
   const total = km[km.length - 1];
   const n = Math.max(2, Math.min(muestras, puntos.length * 4));
   const out = [];
@@ -59,7 +73,8 @@ export function perfilDe(puntos, altura, muestras = 420) {
     const f = Math.min(1, Math.max(0, (d - km[i]) / tramo));
     const lat = puntos[i].lat + (puntos[i + 1].lat - puntos[i].lat) * f;
     const lon = puntos[i].lon + (puntos[i + 1].lon - puntos[i].lon) * f;
-    out.push({ km: d, alt: altura(lat, lon) });
+    const a = eles?.[i], b = eles?.[i + 1];
+    out.push({ km: d, alt: a != null && b != null ? a + (b - a) * f : altura(lat, lon) });
   }
   let ultimo = out.find((p) => p.alt != null)?.alt ?? null;
   for (const p of out) { if (p.alt == null) p.alt = ultimo; else ultimo = p.alt; }

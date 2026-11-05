@@ -117,3 +117,8 @@ test('la caja de la lámina respeta el formato pedido', () => {
   const alto = latAY(c.swlat, 12) - latAY(c.nelat, 12);
   assert.ok(Math.abs(ancho / alto - 2) < 1e-6);
 });
+
+test('el nombre pierde el sufijo de Wikiloc', () => {
+  const r = leerGpx('<gpx><trk><name>Monte Pindo - Wikiloc</name><trkpt lat="1" lon="2"/></trk></gpx>');
+  assert.equal(r.nombre, 'Monte Pindo');
+});

@@ -159,7 +159,6 @@ export async function consultar() {
   refrescarCartela();
   ponerPuntosEnLamina();
   ponerInventario(S.filas);
-  $('btnGuia').disabled = !S.filas.length;
   if (!S.filas.length) {
     estado('');
     aviso(t('sin_especies', { ventana: ventanaTexto() }));
@@ -192,6 +191,8 @@ export async function consultar() {
     if (cancelado()) return;
     aviso(t('err_local'));
   }
+  // La guía necesita puntos y nombres locales: el botón espera a tenerlos.
+  $('btnGuia').disabled = false;
   estado(t('listo', { fecha: fechaTexto() }));
 }
 

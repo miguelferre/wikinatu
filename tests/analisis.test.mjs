@@ -119,3 +119,14 @@ test('el buscador ignora acentos y mira todos los nombres', () => {
   assert.equal(filtrarInventario(filas, { grupo: 'aves' }).length, 1);
   assert.deepEqual(recuentoGrupos(filas).map((g) => g.n), [1, 1]);
 });
+
+test('el perfil prefiere la altitud del GPX a la del modelo', () => {
+  const puntos = Array.from({ length: 12 }, (_, i) => ({ lat: 42 + i * 0.001, lon: 1, ele: 2000 }));
+  const perfil = perfilDe(puntos, () => 2500); // el modelo mide la montaña sobre el túnel
+  assert.ok(perfil.every((p) => p.alt === 2000));
+});
+
+test('sin altitud en el GPX, el perfil usa el modelo', () => {
+  const puntos = Array.from({ length: 12 }, (_, i) => ({ lat: 42 + i * 0.001, lon: 1, ele: null }));
+  assert.ok(perfilDe(puntos, () => 2500).every((p) => p.alt === 2500));
+});
