@@ -1,0 +1,102 @@
+/* Portada: secciones de lectura. Cada una ocupa todo el ancho y centra su contenido. */
+
+.seccion { padding: clamp(48px, 7vw, 96px) max(var(--gut), calc((100% - var(--ancho)) / 2)); }
+.seccion-cabeza { margin-bottom: clamp(20px, 3vw, 36px); }
+.seccion .antetitulo { margin-bottom: 10px; }
+.seccion h2 { font-size: clamp(2.5rem, 1.2rem + 4.8vw, 5.2rem); line-height: 1; }
+.seccion-entrada { margin-top: .8em; max-width: 40em; }
+.nota { color: var(--muted); font-size: .95em; }
+.figura { margin: 0; }
+.figura figcaption { margin-top: 10px; color: var(--muted); font-size: .9rem; max-width: 62em; }
+.figura figcaption b { color: var(--fg); margin-right: .3em; font-weight: 700; }
+
+/* I. La idea */
+.idea-texto { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(24px, 5vw, 64px); align-items: start; }
+.idea-grande { font-size: clamp(1.28rem, 1.05rem + .8vw, 1.7rem); font-weight: 500; line-height: 1.34; }
+.idea-figura { margin-top: clamp(28px, 4vw, 52px); }
+.corte { min-height: 340px; }
+.corte svg { display: block; width: 100%; height: auto; }
+.corte.vacio { min-height: 0; }
+.corte-nivel { stroke: var(--linea-2); stroke-dasharray: 1 5; }
+.corte-canto { stroke: var(--tinta); fill: none; }
+.corte-m { fill: var(--suave); font: 500 12.5px var(--text); font-variant-numeric: lining-nums tabular-nums; }
+.corte-cresta { fill: none; stroke: var(--tinta); stroke-width: 2.4; stroke-linejoin: round; }
+.corte-tramo { stroke: var(--coral); stroke-width: 4; stroke-linecap: round; }
+.corte-punto { stroke: var(--tinta); stroke-width: 1.5; }
+.corte-punto.cima { fill: var(--ambar); }
+.corte-punto.ruta { fill: var(--coral); }
+.corte-guia { fill: none; stroke: var(--tinta); }
+.corte-escala { fill: none; stroke: var(--tinta); }
+.corte-rotulo { fill: var(--tinta); font: 700 15.5px var(--text); paint-order: stroke; stroke: var(--papel); stroke-width: 3.5px; }
+@media (max-width: 759px) { .corte-rotulo { font-size: 13.5px; } }
+
+/* II. Cómo se lee */
+.anatomia { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 300px); gap: clamp(20px, 3vw, 40px); align-items: start; }
+.anatomia-baja { grid-template-columns: minmax(0, 1fr); margin-top: clamp(28px, 4vw, 48px); }
+.anatomia figure { position: relative; min-width: 0; }
+.anatomia-lamina .anatomia-lienzo { border: 6px solid var(--ambar); }
+.anatomia-lienzo { min-height: 240px; }
+.anatomia-lienzo svg { display: block; max-width: 100%; height: auto; }
+#anatomia-cuadro { padding: 10px 12px 8px; background: var(--papel); }
+.llamadas { position: absolute; inset: 0 0 auto; pointer-events: none; }
+.llamada { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 6px; transform: translate(var(--x), var(--y)) translate(0, -50%); white-space: nowrap; }
+.llamada.izquierda { flex-direction: row-reverse; transform: translate(var(--x), var(--y)) translate(-100%, -50%); }
+.llamada-texto { padding: 1px 7px 2px; background: var(--tinta); color: var(--crema); font: 600 .92rem/1.25 var(--text); }
+.llamada-num {
+  flex: none; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--ambar); color: var(--tinta); font: 700 .8rem/1 var(--text);
+}
+.partes { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; font-size: .98rem; }
+.partes li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; }
+.partes b { font-weight: 700; }
+.partes-fila { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 3vw, 40px); margin-top: 14px; }
+.foco-titulo { margin-top: 24px; }
+.especies-foco { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
+.especies-foco button {
+  display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px; font-size: .95rem; font-weight: 600; background: var(--tinta-3);
+  transition: background-color var(--dur-rapida-salida) var(--ease-salida);
+}
+.especies-foco button:hover { color: var(--tinta); background: var(--ambar-2); transition: background-color var(--dur-rapida) var(--ease-entrada); }
+.especies-foco button[aria-pressed="true"] { background: var(--ambar); color: var(--tinta); }
+.especies-foco i { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 0 1.5px var(--crema); }
+
+/* III. Mes y sesgo */
+.mes-rejilla { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 88px); align-items: start; }
+.mes-rejilla > div > p { font-size: clamp(1.14rem, 1.02rem + .4vw, 1.32rem); line-height: 1.38; min-height: 5.4em; }
+.mes-rejilla .figura { margin-top: 20px; }
+.embudo { display: grid; gap: 14px; margin: 0; }
+.embudo dt { font-size: .96rem; font-weight: 600; margin-bottom: 3px; }
+.embudo dd { display: flex; align-items: center; gap: 10px; margin: 0; }
+.embudo span { flex: 0 0 auto; width: calc((100% - 74px) * var(--f)); height: 32px; background: var(--turquesa); }
+.embudo b { font: 400 1.6rem/1 var(--display); letter-spacing: .015em; font-variant-numeric: lining-nums tabular-nums; }
+.barras { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 4px; height: 212px; border-bottom: 3px solid var(--tinta); position: relative; margin-bottom: 26px; }
+.barra-mes { position: relative; display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; }
+.barra-mes b { display: block; text-align: center; font: 600 .92rem/1.5 var(--text); }
+.barra-mes span { display: block; height: calc((100% - 24px) * var(--f)); background: var(--ambar); }
+.barra-mes i { position: absolute; left: 0; right: 0; bottom: -25px; text-align: center; font: 600 .9rem/1.4 var(--text); font-style: normal; color: var(--muted); }
+.limites { margin-top: clamp(40px, 6vw, 68px); padding: clamp(20px, 3vw, 34px); color: var(--crema); background: var(--coral-oscuro); }
+.limites h3 { font-size: clamp(1.7rem, 1.2rem + 1.5vw, 2.5rem); margin-bottom: 16px; }
+.limites dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(18px, 3.4vw, 48px); margin: 0; }
+.limites dt { font: 400 1.26rem/1.15 var(--display); letter-spacing: .015em; text-transform: uppercase; margin-bottom: 6px; }
+.limites dd { margin: 0; }
+
+/* V. Método */
+.metodo-lista { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px clamp(20px, 4vw, 56px); margin: 0; }
+.metodo-lista dt { font: 400 1.3rem/1.15 var(--display); letter-spacing: .015em; text-transform: uppercase; margin-bottom: 5px; }
+.metodo-lista dd { margin: 0; font-size: .98rem; }
+.creditos { margin-top: clamp(32px, 5vw, 54px); padding-top: 18px; border-top: 3px solid var(--tinta); max-width: 52em; }
+.creditos h3 { font-size: 1.5rem; margin-bottom: 8px; }
+
+.pie {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 24px; justify-content: space-between;
+  padding: 18px max(var(--gut), calc((100% - var(--ancho)) / 2)) 26px; font-size: .94rem;
+}
+.pie .marca { color: var(--ambar); }
+
+@media (max-width: 899px) {
+  .idea-texto, .mes-rejilla, .anatomia { grid-template-columns: minmax(0, 1fr); }
+  .mes-rejilla > div > p { min-height: 0; }
+  .limites dl, .metodo-lista, .partes-fila { grid-template-columns: minmax(0, 1fr); }
+  .llamada-texto { display: none; }
+  .llamada.izquierda { transform: translate(var(--x), var(--y)) translate(-100%, -50%); }
+}

@@ -5,28 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>WikiNatu: visor de rutas</title>
 <meta name="description" content="Lámina, cuadro, inventario y guía de una ruta GPX con las observaciones de iNaturalist. El GPX no sale del navegador.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230b1d24'/%3E%3Cpath d='M3 25 12 10l5 7 4-5 8 13z' fill='none' stroke='%23ecd38a' stroke-width='2'/%3E%3Ccircle cx='12' cy='10' r='3' fill='%23ff7a59'/%3E%3C/svg%3E">
-<link rel="preload" href="fonts/alegreya-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/alegreya-wght-italic.woff2" as="font" type="font/woff2" crossorigin>
+<meta name="theme-color" content="#14262b">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2314262b'/%3E%3Ccircle cx='21' cy='12' r='7' fill='%23f6ad1f'/%3E%3Cpath d='M0 32 11 13l6 9 4-5 11 15z' fill='%23f7ecd2'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/anton-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/barlow-500-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/temas.css">
 <link rel="stylesheet" href="css/visor.css">
+<link rel="stylesheet" href="css/visor-listas.css">
+<link rel="stylesheet" href="css/visor-carga.css">
 <link rel="stylesheet" href="css/print.css" media="print">
-<script src="js/tema.js"></script>
 <script type="module" src="js/visor.js"></script>
 </head>
 <body>
 <a class="skip" href="#plancha" data-t="saltar">Saltar a la lámina</a>
 
-<header class="cabecera">
-  <a class="marca" href="index.html">Wiki<span>Natu</span></a>
+<header class="cabecera oscuro">
+  <a class="marca" href="index.html">WIKINATU</a>
   <nav class="barra-rutas" data-t-aria="rutas_aria" aria-label="Tus rutas">
     <ul id="listaRutas"></ul>
   </nav>
   <div class="cabecera-acciones">
     <button id="btnGpx" class="boton" type="button" data-t="anadir_gpx">Añadir GPX</button>
     <input id="fichero" type="file" accept=".gpx,application/gpx+xml" multiple hidden>
-    <button id="btnGuia" class="boton boton-oro" type="button" data-t="descargar_guia" disabled>Descargar guía</button>
+    <button id="btnGuia" class="boton boton-principal" type="button" data-t="descargar_guia" disabled>Descargar guía</button>
     <div class="idioma" role="group" data-t-aria="idioma_aria" aria-label="Idioma">
       <button type="button" data-lang="es">ES</button><button type="button" data-lang="en">EN</button>
     </div>
@@ -36,6 +37,7 @@
 <main id="principal">
   <h1 id="titulo" class="solo-lector">WikiNatu</h1>
 
+  <div class="visor-arriba oscuro">
   <section class="filtros" id="filtros" data-t-aria="filtros_aria" aria-label="Filtros" hidden>
     <div class="tira-grupo">
       <div class="tira" id="tiraMeses" role="group" data-t-aria="meses_aria" aria-label="Mes central"></div>
@@ -66,11 +68,11 @@
 
   <section class="vacio" id="vacio" hidden>
     <div class="vacio-plancha">
-      <p class="versal" data-t="vacio_sup">Sin ruta</p>
+      <p class="antetitulo" data-t="vacio_sup">Sin ruta</p>
       <h2 data-t="vacio_titulo">Suelta un GPX en cualquier parte de esta página</h2>
       <p class="texto" data-t="vacio_texto">El fichero se lee aquí, en tu navegador. A iNaturalist solo salen cajas de coordenadas.</p>
       <div class="vacio-acciones">
-        <button id="btnGpx2" class="boton boton-oro" type="button" data-t="elegir_gpx">Elegir un GPX</button>
+        <button id="btnGpx2" class="boton boton-principal" type="button" data-t="elegir_gpx">Elegir un GPX</button>
         <a class="boton" href="ruta.html?ruta=tristaina" data-t="ver_ejemplo">Ver el ejemplo de Tristaina</a>
       </div>
     </div>
@@ -80,7 +82,7 @@
     <div class="plancha-lienzo" id="lienzo">
       <div class="carga" id="carga" aria-hidden="true" hidden>
         <p class="carga-sup" id="cargaSup"></p>
-        <p class="carga-que" id="cargaQue"></p>
+        <ol class="carga-fases" id="cargaFases"></ol>
         <p class="carga-paso" id="cargaPaso"></p>
         <div class="carga-barra" id="cargaBarra"><span></span></div>
         <p class="carga-nota" id="cargaNota" data-t="carga_nota"></p>
@@ -88,6 +90,7 @@
     </div>
     <aside class="cartela" id="cartela" data-t-aria="cartela_aria" aria-label="Cartela de la lámina"></aside>
   </section>
+  </div>
 
   <section class="seccion" id="seccionCuadro" hidden>
     <header class="seccion-cabeza">
@@ -118,7 +121,7 @@
   </section>
 </main>
 
-<footer class="pie" id="pie">
+<footer class="pie oscuro" id="pie">
   <p class="texto" data-t-html="creditos"></p>
   <p class="texto"><a href="index.html" data-t="volver">Volver a la portada</a></p>
 </footer>

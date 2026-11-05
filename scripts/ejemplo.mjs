@@ -13,7 +13,7 @@ if (!ORIGEN) throw new Error('Uso: node scripts/ejemplo.mjs <ruta.gpx>');
 const DATOS = fileURLToPath(new URL('../web/data/', import.meta.url));
 const MAX_PUNTOS = 300;
 const MAX_ESPECIES = 200;
-const ESPECIES_CON_FOTO = 40;
+const ESPECIES_CON_FOTO = 200; // las tarjetas de la portada necesitan foto de todas las que puedan salir
 
 // inat.js ya va a 1 petición por segundo. Aquí solo se identifica el cliente.
 const fetchNativo = globalThis.fetch;

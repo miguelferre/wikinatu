@@ -5,7 +5,7 @@ import { porMes, puntosDe } from './inat.js';
 import { autorCorto, nombreVisible } from './analisis.js';
 import { crearLamina } from './lamina.js';
 import { S, filtrosActuales, formato, mesesFiltro } from './visor.js';
-import { nombreLocalEl, textoObs, urlInat } from './inventario.js';
+import { nombreLocalEl, urlInat } from './inventario.js';
 
 const $ = (id) => document.getElementById(id);
 let mini = null;
@@ -38,6 +38,41 @@ function barras(caja, valores) {
   caja.replaceChildren(lista);
 }
 
+// Una fila de cifras. La caja se rellena cuando llega su dato; sin dato queda oculta.
+function cifra(caja, titulo, valor = null) {
+  const d = el('div');
+  const dd = el('dd', 'num', valor);
+  d.hidden = valor == null;
+  d.append(el('dt', null, titulo), dd);
+  caja.append(d);
+  return (texto) => { dd.textContent = texto; d.hidden = false; };
+}
+
+const mayuscula = (s) => s.charAt(0).toLocaleUpperCase() + s.slice(1);
+
+// «Junio a agosto» si los meses van seguidos; si no, la lista corta.
+function textoMeses(valores) {
+  const nombres = t('meses');
+  const con = valores.flatMap((v, i) => (v ? [i] : []));
+  if (!con.length) return null;
+  if (con.length === 1) return mayuscula(nombres[con[0]]);
+  const seguidos = con.at(-1) - con[0] + 1 === con.length;
+  return seguidos ? t('f_meses_de', { a: mayuscula(nombres[con[0]]), b: nombres[con.at(-1)] }) : mayuscula(con.map((i) => nombres[i].slice(0, 3)).join(', '));
+}
+
+const km1 = (k) => new Intl.NumberFormat(document.documentElement.lang === 'en' ? 'en-GB' : 'es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(k);
+
+// Kilómetros de la ruta entre los que se vio y distancia del punto más cercano.
+function enLaRuta(puntos) {
+  const p = puntos.map((q) => S.proyectar(q.lat, q.lon));
+  const kms = p.map((q) => q.km);
+  const a = Math.min(...kms), b = Math.max(...kms);
+  return {
+    ruta: km1(a) === km1(b) ? t('f_km', { a: km1(a) }) : t('f_km_de', { a: km1(a), b: km1(b) }),
+    cerca: t('f_a_m', { n: formato(Math.round(Math.min(...p.map((q) => q.distanciaKm)) * 1000)) }),
+  };
+}
+
 function cerrarMini() {
   mini?.destruir();
   mini = null;
@@ -67,16 +102,18 @@ export async function abrirFicha(taxon) {
   }
 
   const der = el('div', 'ficha-datos');
-  const grupo = el('p', 'esp-grupo');
-  const punto = el('span', 'punto');
-  punto.style.background = `var(--c-${f.grupo.color})`;
-  grupo.append(punto, el('span', null, t(`g_${f.grupo.id}`)));
+  const grupo = el('p', 'ficha-grupo', t(`g_${f.grupo.id}`));
   const h = el('h2', 'ficha-nombre', nombreVisible(f));
   h.id = 'fichaNombre';
   der.append(grupo, h);
   if (f.nombreLocal) der.append(nombreLocalEl(f));
   if (nombreVisible(f) !== f.cientifico) der.append(el('p', 'ficha-cientifico cientifico', f.cientifico));
-  der.append(el('p', 'esp-obs', textoObs(f.observaciones)));
+  const cifras = el('dl', 'ficha-cifras');
+  cifra(cifras, t('f_observaciones'), formato(f.observaciones));
+  const ponerMeses = cifra(cifras, t('c_meses'));
+  const ponerRuta = cifra(cifras, t('f_en_ruta'));
+  const ponerCerca = cifra(cifras, t('f_mas_cerca'));
+  der.append(cifras);
 
   const tit = el('h3', 'ficha-sub', t('f_por_mes'));
   const cajaBarras = el('div', 'ficha-barras');
@@ -100,7 +137,12 @@ export async function abrirFicha(taxon) {
   cerrar.focus();
 
   porMes(S.caja, f.id, S.calidad)
-    .then((v) => { if (yo === turno) barras(cajaBarras, v); })
+    .then((v) => {
+      if (yo !== turno) return;
+      barras(cajaBarras, v);
+      const meses = textoMeses(v);
+      if (meses) ponerMeses(meses);
+    })
     .catch(() => { if (yo === turno) cajaBarras.replaceChildren(el('p', 'ficha-cargando', t('err_api'))); });
 
   try {
@@ -112,7 +154,10 @@ export async function abrirFicha(taxon) {
     const puntos = crudos.filter((p) => S.tramos.contiene(p.lat, p.lon))
       .map((p) => ({ lat: p.lat, lon: p.lon, taxon: f.id, color: f.grupo.color, nombre: nombreVisible(f) }));
     l.ponerObservaciones(puntos);
-    if (!puntos.length) notaMini.textContent = t('f_sin_puntos');
+    if (!puntos.length) { notaMini.textContent = t('f_sin_puntos'); return; }
+    const { ruta, cerca } = enLaRuta(puntos);
+    ponerRuta(ruta);
+    ponerCerca(cerca);
   } catch {
     if (yo === turno) notaMini.textContent = t('err_puntos');
   }

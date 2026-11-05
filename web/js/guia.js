@@ -30,7 +30,7 @@ function fuera(ancho, alto) {
 async function imagenLamina() {
   // Plancha pequeña a densidad 3: en A5 el texto del marco queda en unos 6 pt.
   const caja = fuera(760, 900);
-  const l = await crearLamina(caja, { puntos: S.ruta.puntos, nombre: S.ruta.nombre }, { rampa: 'papel', densidad: 3, marco: true });
+  const l = await crearLamina(caja, { puntos: S.ruta.puntos, nombre: S.ruta.nombre }, { papel: true, densidad: 3, marco: true });
   l.ponerObservaciones(S.obs);
   const url = l.lienzoComoImagen('image/jpeg', 0.9);
   l.destruir();
@@ -45,7 +45,7 @@ function svgCuadro() {
   for (const f of S.filas) n.set(f.grupo.color, (n.get(f.grupo.color) || 0) + 1);
   const leyenda = COLORES.filter((c) => n.has(c)).map((c) => ({ color: c, etiqueta: t(`l_${c}`), n: formato(n.get(c)) }));
   const c = dibujarCuadro(caja, { perfil: S.perfil, etiquetas, leyenda }, {
-    tema: 'papel', ancho: 680, altoMontana: 300, titulo: t('g_cuadro'),
+    ancho: 680, altoMontana: 300, titulo: t('g_cuadro'),
     marcas: S.obs.map((o) => ({ km: S.proyectar(o.lat, o.lon).km, color: o.color })),
   });
   const svg = c.comoSvg();
@@ -56,7 +56,7 @@ function svgCuadro() {
 
 function datos() {
   const dl = el('dl', 'g-datos');
-  const km = new Intl.NumberFormat(document.documentElement.lang === 'en' ? 'en-GB' : 'es-ES', { maximumFractionDigits: 1 }).format(S.resumen?.km ?? 0);
+  const km = new Intl.NumberFormat(document.documentElement.lang === 'en' ? 'en-GB' : 'es-ES', { maximumFractionDigits: (S.resumen?.km ?? 0) < 10 ? 2 : 1 }).format(S.resumen?.km ?? 0);
   const filas = [[t('c_distancia'), `${km} km`]];
   if (S.resumen?.sube != null) {
     filas.push([t('c_desnivel'), `+${formato(S.resumen.sube)} m`]);

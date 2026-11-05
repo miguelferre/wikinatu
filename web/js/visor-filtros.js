@@ -10,14 +10,13 @@ let avisar = () => {};
 export function pintarTira() {
   const tira = $('tiraMeses');
   const nombres = t('meses');
-  const estrecho = matchMedia('(max-width: 860px)').matches;
   const elegidos = ventanaMeses(S.mes);
   tira.classList.toggle('anio', S.todoAnio);
   tira.replaceChildren(...nombres.map((nombre, i) => {
     const m = i + 1;
     const b = document.createElement('button');
     b.type = 'button';
-    b.textContent = estrecho ? t('meses_ini')[i] : nombre.slice(0, 3);
+    b.textContent = nombre.slice(0, 3);
     b.setAttribute('aria-label', nombre);
     const dentro = !S.todoAnio && elegidos.includes(m);
     b.setAttribute('aria-pressed', String(dentro));
@@ -40,7 +39,6 @@ export function pintarTira() {
 export function iniciarFiltros({ alCambiar, alCambiarLocal }) {
   avisar = alCambiar;
   pintarTira();
-  matchMedia('(max-width: 860px)').addEventListener('change', pintarTira);
   $('btnAnio').addEventListener('click', () => {
     S.todoAnio = !S.todoAnio;
     pintarTira();

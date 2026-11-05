@@ -4,6 +4,7 @@
 import { cargarDem } from './terrain.js';
 import { t, idiomaActual } from './i18n.js';
 import { fmt } from './heroe-tira.js';
+import { pinturaCuadro } from './temas.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const el = (nombre, attrs = {}, padre, texto) => {
@@ -66,15 +67,14 @@ function pintarCorte(caja, alts, datos) {
   el('path', { class: 'corte-canto', d: `M${izq} ${arr}V${arr + ih}M${w - der} ${arr}V${arr + ih}` }, svg);
 
   const cresta = alts.map((a, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)} ${Y(a).toFixed(1)}`).join('');
-  el('path', { class: 'corte-monte', d: `${cresta}L${X(MUESTRAS - 1)} ${arr + ih}L${izq} ${arr + ih}Z` }, svg);
-  let plumas = '';
-  for (let x = izq + 2, n = 0; x < w - der; x += 3, n++) {
-    const i = Math.round(((x - izq) / iw) * (MUESTRAS - 1));
-    const y = Y(alts[i]);
-    const largo = Math.min(arr + ih - y, 10 + (Math.sin(n * 1.7) + Math.sin(n * 0.61) + 2) * 7 + (arr + ih - y) * 0.22);
-    plumas += `M${x} ${(y + 2).toFixed(1)}v${largo.toFixed(1)}`;
-  }
-  el('path', { class: 'corte-pluma', d: plumas }, svg);
+  // La silueta, en las tintas planas del cuadro.
+  const base = arr + ih;
+  const { bandas } = pinturaCuadro();
+  bandas.forEach((c, n) => {
+    const q = 1 - n / bandas.length;
+    const linea = alts.map((a, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)} ${(base - (base - Y(a)) * q).toFixed(1)}`).join('');
+    el('path', { d: `${linea}L${X(MUESTRAS - 1)} ${base}L${izq} ${base}Z`, fill: c }, svg);
+  });
   el('path', { class: 'corte-cresta', d: cresta }, svg);
 
   const iCima = alts.indexOf(Math.max(...alts));
@@ -88,7 +88,7 @@ function pintarCorte(caja, alts, datos) {
   const anchoRuta = Math.max(3, r.km * pxKm);
   const rx = X(iTristaina) - anchoRuta - 2, ry = Y((r.altMin + r.altMax) / 2);
   const rotulos = [
-    { x: X(iCima), y: Y(alts[iCima]), texto: t('corte_cima'), clase: 'oro', lado: 1 },
+    { x: X(iCima), y: Y(alts[iCima]), texto: t('corte_cima'), clase: 'cima', lado: 1 },
     { x: X(iHumboldt), y: Y(5878), texto: t('corte_humboldt'), clase: 'ruta', lado: -1 },
     { x: rx + anchoRuta / 2, y: ry, texto: t('corte_ruta', { min: fmt(r.altMin, 0), max: fmt(r.altMax, 0) }), clase: 'ruta', lado: -1 },
   ];
@@ -139,7 +139,7 @@ export function iniciarCorte(datos) {
 
 /* Fig. 4 y 5. Las cifras de Hermanas son las del encargo; las de Tristaina, del JSON. */
 
-const HERMANAS = [['embudo_ano', 1126], ['embudo_trim', 518], ['embudo_mes', 298]];
+const HERMANAS = [['embudo_ano', 1125], ['embudo_trim', 518], ['embudo_mes', 298]];
 
 export function pintarMes(datos) {
   const embudo = document.getElementById('embudo');

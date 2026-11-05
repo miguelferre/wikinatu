@@ -17,7 +17,7 @@ export function leerGuardadas() {
 
 function escribir(lista) {
   // Si el almacén está lleno se olvidan las rutas más antiguas.
-  for (let n = lista.length; n > 0; n--) {
+  for (let n = lista.length; n >= 0; n--) {
     try {
       localStorage.setItem(CLAVE, JSON.stringify(lista.slice(0, n)));
       return;

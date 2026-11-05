@@ -1,4 +1,4 @@
-// Acabado de plancha grabada sobre el relieve de terrain.js: normales de costa, hachuras y grano.
+// Acabado de plancha sobre el relieve de terrain.js: normales de costa y grano.
 // Trabaja sobre el canvas ya pintado. No conoce la ruta ni las observaciones.
 
 // Bajo este valor es mar. El modelo suavizado no llega a 0 justo en la orilla.

@@ -1,0 +1,76 @@
+/* Visor: inventario y ficha. */
+
+/* Inventario */
+.inventario-controles { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; }
+.grupos { display: flex; flex-wrap: wrap; gap: 4px; }
+.grupo { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 4px 10px; color: var(--fg); font: 600 .94rem/1.1 var(--text); background: var(--papel-2); border: 0; cursor: pointer; transition: background-color var(--dur-rapida-salida) var(--ease-salida); }
+.grupo:hover { background: var(--ambar-2); transition-duration: var(--dur-rapida); }
+.grupo[aria-pressed="true"] { color: var(--tinta); background: var(--ambar); }
+.grupo-n { color: var(--muted); font-variant-numeric: lining-nums tabular-nums; }
+.grupo[aria-pressed="true"] .grupo-n { color: var(--tinta); }
+.buscador input { width: min(280px, 100%); padding: 7px 10px; color: var(--fg); font: inherit; background: var(--papel-claro); border: 0; box-shadow: inset 0 0 0 2px var(--tinta); }
+.buscador input::placeholder { color: var(--muted); }
+.sesgo { max-width: 72ch; margin: 14px 0 16px; padding-left: 12px; color: var(--muted); font-size: .98rem; border-left: 4px solid var(--coral); }
+.especies { display: grid; grid-template-columns: repeat(auto-fill, minmax(226px, 1fr)); gap: 14px; margin: 0; padding: 0; list-style: none; }
+.especie { display: flex; flex-direction: column; min-width: 0; background: var(--papel-claro); }
+.esp-abrir { display: block; width: 100%; padding: 0; overflow: hidden; background: var(--tinta-2); border: 0; cursor: pointer; }
+.esp-abrir img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; transition: filter var(--dur-media-salida) var(--ease-salida); }
+.esp-abrir:hover img { filter: brightness(1.08); transition-duration: var(--dur-media); }
+.esp-texto { display: flex; flex: 1; flex-direction: column; padding: 9px 12px 11px; }
+.esp-grupo { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: .84rem; font-weight: 600; line-height: 1.2; }
+.esp-num { margin-left: auto; font-variant-numeric: lining-nums tabular-nums; }
+.esp-nombre { margin-top: 6px; font-size: 1.32rem; line-height: 1.06; }
+.esp-titulo { padding: 0; color: var(--fg); font: inherit; letter-spacing: inherit; text-align: left; text-transform: inherit; background: none; border: 0; cursor: pointer; }
+.esp-titulo:hover { color: var(--coral-oscuro); }
+.esp-local { margin-top: 3px; font-size: 1rem; font-weight: 600; }
+.esp-cientifico { margin-top: 2px; color: var(--muted); font-size: .98rem; line-height: 1.2; }
+.esp-obs { margin-top: 6px; font-size: .94rem; font-weight: 600; font-variant-numeric: lining-nums tabular-nums; }
+.esp-autor { margin-top: auto; padding-top: 6px; overflow: hidden; color: var(--muted); font-size: .76rem; line-height: 1.25; overflow-wrap: anywhere; }
+.esp-enlace { margin-top: 3px; font-size: .92rem; }
+.especie.sin-foto { background: var(--papel-2); }
+.especie.sin-foto .esp-nombre { margin-top: 12px; font-size: 1.55rem; }
+.inventario-fin { margin-top: 10px; color: var(--muted); font-size: .94rem; font-variant-numeric: lining-nums tabular-nums; }
+#btnMas { margin-top: 8px; }
+
+/* Ficha */
+.ficha { width: min(1020px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); padding: 0; overflow: auto; color: var(--fg); background: var(--papel); border: 0; }
+.ficha[open] { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr); animation: ficha-entra var(--dur-lenta) var(--ease-entrada); }
+.ficha::backdrop { background: var(--velo); }
+@keyframes ficha-entra { from { opacity: 0; transform: translateY(6px); } }
+.ficha-cerrar { position: absolute; top: 12px; right: 12px; z-index: 2; display: grid; width: 34px; height: 34px; place-items: center; color: var(--crema); background: var(--tinta); border: 0; cursor: pointer; }
+.ficha-foto { display: flex; flex-direction: column; min-height: 0; background: var(--tinta); }
+.ficha-foto img { display: block; flex: 1; width: 100%; min-height: 0; object-fit: cover; }
+.ficha-credito { padding: 7px 12px 8px; color: var(--suave-oscuro); font-size: .8rem; line-height: 1.3; overflow-wrap: anywhere; }
+.ficha-sinfoto { display: grid; flex: 1; min-height: 280px; place-items: center; padding: 20px; color: var(--suave-oscuro); text-align: center; }
+.ficha-datos { display: flex; flex-direction: column; min-width: 0; padding: 22px 26px 20px; }
+.ficha-grupo { align-self: flex-start; padding: 6px 9px; color: var(--crema); font: 400 .88rem/1 var(--display); letter-spacing: .08em; text-transform: uppercase; background: var(--turquesa); }
+.ficha-nombre { margin-top: 12px; padding-right: 34px; font-size: clamp(2.3rem, 1.4rem + 3vw, 3.7rem); line-height: 1; }
+.ficha-datos .esp-local { font-size: 1.15rem; }
+.ficha-cientifico { margin-top: 4px; color: var(--fg); font-size: 1.14rem; }
+.ficha-cifras { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; margin: 14px 0 0; }
+.ficha-cifras dt { color: var(--muted); font-size: .82rem; font-weight: 600; }
+.ficha-cifras dd { margin: 0; font: 400 1.46rem/1.1 var(--display); letter-spacing: .015em; font-variant-numeric: lining-nums tabular-nums; }
+.ficha-sub { margin-top: 16px; color: var(--muted); font: 700 .78rem/1.2 var(--text); letter-spacing: .1em; }
+.ficha-barras { margin-top: 6px; }
+.ficha-cargando { color: var(--muted); font-size: .94rem; }
+.barras { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 3px; height: 92px; margin: 0; padding: 0; list-style: none; }
+.barras li { display: grid; grid-template-rows: 14px 1fr 16px; min-width: 0; text-align: center; }
+.barra-n { color: var(--muted); font-size: .72rem; line-height: 14px; font-variant-numeric: lining-nums tabular-nums; }
+.barra-col { display: flex; align-items: flex-end; border-bottom: 2px solid var(--tinta); }
+.barra { display: block; width: 100%; min-height: 1px; background: var(--linea-2); }
+.barra-mes { color: var(--muted); font: 600 .78rem/16px var(--text); }
+.barras .marcado .barra { background: var(--ambar); }
+.barras .marcado .barra-mes { color: var(--fg); }
+.ficha-mini { position: relative; margin-top: 6px; border: 4px solid var(--ambar); }
+.ficha-nota { margin-top: 4px; color: var(--muted); font-size: .9rem; }
+.ficha-enlaces { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; font-size: .98rem; }
+
+@media (max-width: 760px) {
+  .ficha[open] { display: block; }
+  .ficha-foto img { flex: none; max-height: 40dvh; }
+  .ficha-datos { padding: 14px 16px 16px; }
+  .especies { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .esp-nombre { font-size: 1.14rem; }
+  .buscador { width: 100%; }
+  .buscador input { width: 100%; }
+}

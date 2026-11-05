@@ -34,10 +34,10 @@ function pasoTexto(r) {
 
 const unir = (...partes) => partes.filter(Boolean).join(', ');
 
-// Lo que se lee en el aviso de la lámina: qué hace, y por dónde va.
+// Lo que se lee bajo las fases: por dónde va la consulta.
 function detalle(r) {
   const avance = unir(pasoTexto(r), r.etapa === 'especies' ? parcialTexto() : '');
-  return r.fase === 'relieve' && r.etapa ? `${t(`carga_${r.etapa}`)}: ${avance}` : avance;
+  return r.etapa ? `${t(`carga_${r.etapa}`)}: ${avance}` : '';
 }
 
 // Valor de la fila Especies de la cartela.
@@ -45,6 +45,19 @@ export function especiesCartela(n) {
   if (S.completa) return formato(n);
   if (S.fallo) return t('c_sin_datos');
   return S.carga.parcial ? t('c_parcial', { n: formato(S.carga.parcial) }) : t('c_consultando');
+}
+
+// Las fases de esta carga, en su orden: hecha, en curso o por llegar.
+function pintarFases(r) {
+  const c = S.carga;
+  const lista = ['relieve', 'especies', 'puntos', 'nombres'].filter((k) => c[k]);
+  const hecha = (k) => (k === 'relieve' ? c.relieve === 'listo' : c[k].a >= c[k].b);
+  $('cargaFases').replaceChildren(...lista.map((k) => {
+    const li = document.createElement('li');
+    li.className = hecha(k) ? 'hecha' : k === r.fase ? 'ahora' : '';
+    li.textContent = t(`carga_${k}`);
+    return li;
+  }));
 }
 
 function pintarLinea(id, visible, texto, f) {
@@ -74,7 +87,7 @@ function pintar(r) {
   const caja = $('carga');
   caja.hidden = !vista;
   if (vista) {
-    if (r.fase) $('cargaQue').textContent = t(`carga_${r.fase}`);
+    pintarFases(r);
     $('cargaSup').textContent = viejos && !S.completa ? t('carga_actualiza', { ventana: ventanaTexto() }) : t('carga_sup');
     $('cargaPaso').textContent = detalle(r);
     $('cargaNota').hidden = !r.etapa;

@@ -32,7 +32,7 @@ export function pintarCartela(caja, { nombre, resumen, filas, ventana, puntos, e
   caja.dataset.esquina = esquina;
   const dl = el('dl');
   if (resumen) {
-    const km = new Intl.NumberFormat(document.documentElement.lang === 'en' ? 'en-GB' : 'es-ES', { maximumFractionDigits: 1 }).format(resumen.km);
+    const km = new Intl.NumberFormat(document.documentElement.lang === 'en' ? 'en-GB' : 'es-ES', { maximumFractionDigits: resumen.km < 10 ? 2 : 1 }).format(resumen.km);
     dl.append(fila(t('c_distancia'), `${km} km`));
     if (resumen.sube != null) {
       dl.append(fila(t('c_desnivel'), `+${formato(resumen.sube)} m`));

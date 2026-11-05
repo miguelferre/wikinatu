@@ -1,4 +1,4 @@
-// Marco de la plancha: doble filete, banda graduada, grados, retícula, escala y norte.
+// Marco de la plancha: filetes, banda graduada, grados, retícula, escala y norte.
 // Todo en lienzo para que la imagen de la guía lleve la misma tipografía.
 
 const PASOS = [
@@ -56,7 +56,7 @@ function norte(ctx, x, y, h, tema) {
   ctx.moveTo(x, y - h / 2); ctx.lineTo(x + w, y + h / 2); ctx.lineTo(x, y + h * 0.3); ctx.lineTo(x - w, y + h / 2);
   ctx.closePath();
   ctx.lineWidth = 0.9; ctx.strokeStyle = tema.tinta; ctx.stroke();
-  ctx.font = `500 ${h * 0.46}px Alegreya, serif`;
+  ctx.font = `600 ${h * 0.46}px Barlow, sans-serif`;
   ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
   halo(ctx, tema, 'N', x, y - h / 2 - h * 0.1, 3);
   ctx.restore();
@@ -86,13 +86,13 @@ function escalaGrafica(ctx, geo, dem, tema, esquina) {
   ctx.strokeRect(xCaja, y - 32, anchoCaja, 44);
   for (let i = 0; i < partes; i++) {
     const a = x0 + (px / partes) * i;
-    ctx.fillStyle = i % 2 ? tema.fondo : tema.tinta;
+    ctx.fillStyle = i % 2 ? tema.blanco : tema.tinta;
     ctx.fillRect(a, y, px / partes, alto);
   }
   ctx.lineWidth = 0.8;
   ctx.strokeStyle = tema.tinta;
   ctx.strokeRect(x0, y, px, alto);
-  ctx.font = `500 ${pequena ? 11 : 12.5}px Alegreya, serif`;
+  ctx.font = `600 ${pequena ? 11 : 12.5}px Barlow, sans-serif`;
   ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = tema.tinta;
   ctx.textAlign = 'left';
@@ -150,7 +150,7 @@ export function dibujarMarco(ctx, _u, { geo, dem, caja, tema, esquinaEscala }) {
     for (let v = v0; v < fin; v += paso, n++) out.push([aPos(v), aPos(v + paso), n & 1]);
     return out;
   };
-  ctx.fillStyle = tema.tinta;
+  ctx.fillStyle = tema.marco;
   for (const [a, b, par] of tramos(caja.swlng, caja.nelng, fino(pLon), aX)) {
     if (!par) continue;
     const x = Math.max(M, a), w = Math.min(M + iw, b) - x;
@@ -167,19 +167,15 @@ export function dibujarMarco(ctx, _u, { geo, dem, caja, tema, esquinaEscala }) {
   }
 
   // Filetes: interior, exterior de banda y doble filete de borde.
-  ctx.strokeStyle = tema.tinta;
+  ctx.strokeStyle = tema.marco;
   ctx.lineWidth = 0.8;
   ctx.strokeRect(M + 0.4, M + 0.4, iw - 0.8, ih - 0.8);
   ctx.strokeRect(M - banda, M - banda, iw + 2 * banda, ih + 2 * banda);
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(1.5, 1.5, W - 3, H - 3);
-  ctx.lineWidth = 0.6;
-  ctx.strokeRect(5, 5, W - 10, H - 10);
 
   // Grados en el margen, en el espacio entre filetes.
   const cuerpo = pequena ? 9.5 : 12.5;
-  ctx.font = `500 ${cuerpo}px Alegreya, serif`;
-  ctx.fillStyle = tema.suave;
+  ctx.font = `500 ${cuerpo}px Barlow, sans-serif`;
+  ctx.fillStyle = tema.marcoSuave;
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'center';
   const en = document.documentElement.lang === 'en';

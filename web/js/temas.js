@@ -1,9 +1,9 @@
-// Lee de css/temas.css los colores que se pintan en lienzo y en SVG.
+// Lee de css/base.css los colores que se pintan en lienzo y en SVG.
 // Solo se llama al pintar, nunca al importar: las pruebas de node no tienen DOM.
 
 export const token = (nombre) => getComputedStyle(document.documentElement).getPropertyValue(`--${nombre}`).trim();
 
-export const rampaDe = (nombre) => token(`rampa-${nombre}`).split(',').map((c) => c.trim());
+const lista = (nombre) => token(nombre).split(',').map((c) => c.trim());
 
 const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 
@@ -12,32 +12,29 @@ const curvas = (p) => ({
   halo: token(`${p}-curva-halo`), cota: token(`${p}-curva-cota`),
 });
 
-// modo: 'noche' en pantalla, 'papel' en la guía.
-export function pinturaLamina(modo) {
-  const p = modo === 'papel' ? 'gui' : 'lam';
-  const v = (k) => token(`${p}-${k}`);
+// papel: true en la guía. Solo cambia el margen de la plancha: dentro todo es igual.
+export function pinturaLamina({ papel = false } = {}) {
+  const v = (k) => token(`lam-${k}`);
+  const m = papel ? 'gui' : 'lam';
   return {
-    rampa: rampaDe(modo), claro: v('claro') === '1',
-    fondo: v('fondo'), tinta: v('tinta'), suave: v('suave'), halo: v('halo'), casing: v('casing'),
+    rampa: lista('rampa'), claro: v('claro') === '1',
+    fondo: token(`${m}-fondo`), marco: token(`${m}-marco`), marcoSuave: token(`${m}-marco-suave`),
+    tinta: v('tinta'), suave: v('suave'), halo: v('halo'), casing: v('casing'),
     anillo: v('anillo'), blanco: v('blanco'), ruta: v('ruta'), vacio: v('vacio'),
-    mar: { fondo: rgb(v('mar-fondo')), fondo2: rgb(v('mar-fondo2')), linea: rgb(v('mar-linea')) },
-    curvas: curvas(p),
+    mar: { fondo: rgb(token('lam-mar-fondo')), fondo2: rgb(token('lam-mar-fondo2')), linea: rgb(token('lam-mar-linea')) },
+    curvas: curvas('lam'),
   };
 }
 
-export function pinturaCuadro(modo) {
-  const p = modo === 'papel' ? 'cug' : 'cua';
-  const v = (k) => token(`${p}-${k}`);
-  return {
-    rampa: rampaDe(modo), fondo: v('fondo'), tinta: v('tinta'), suave: v('suave'),
-    cielo: v('cielo'), sombra: v('sombra'), anillo: v('anillo'),
-  };
+export function pinturaCuadro() {
+  const v = (k) => token(`cua-${k}`);
+  return { bandas: lista('cua-bandas'), tinta: v('tinta'), suave: v('suave'), anillo: v('anillo'), curva: v('curva') };
 }
 
 export function pinturaHeroe() {
   return {
-    rampa: rampaDe('heroe'), fondo: rampaDe('heroe-fondo'), claro: token('heroe-claro') === '1',
+    rampa: lista('rampa'), fondo: lista('heroe-fondo'), claro: token('lam-claro') === '1',
     hilo: token('heroe-hilo'), base: token('heroe-base'), velo: token('heroe-velo'), casing: token('heroe-casing'),
-    lavado: Number(token('heroe-lavado')), curvas: curvas('lam'),
+    curvas: curvas('heroe'), curvasRelieve: curvas('lam'),
   };
 }

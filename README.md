@@ -26,6 +26,6 @@ npm test
 
 - Observaciones y fotos: [iNaturalist](https://www.inaturalist.org) y sus observadores. Solo se enseñan fotos con licencia abierta, con autor y licencia.
 - Relieve: [Mapterhorn](https://mapterhorn.com/attribution).
-- Tipografía: [Alegreya y Alegreya Sans](https://github.com/huertatipografica/Alegreya), con licencia OFL. Ver `web/fonts/OFL.txt`.
+- Tipografía: [Anton](https://github.com/googlefonts/AntonFont) y [Barlow](https://github.com/jpt/barlow), con licencia OFL. Ver `web/fonts/OFL.txt`.
 - Ruta de ejemplo: Lagos de Tristaina, de Miguel Ferreiro.
 - Código: licencia MIT. Ver `LICENSE`.

@@ -71,7 +71,7 @@ export function grabarCurvas(canvas, dem, { curvas, escala, unidad, intervalo, c
   ctx.lineWidth = 0.8 * unidad;
   ctx.stroke(maestras);
 
-  ctx.font = `italic 500 ${11.5 * unidad}px Alegreya, serif`;
+  ctx.font = `italic 400 ${11.5 * unidad}px Barlow, sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   for (const r of rotulos) {

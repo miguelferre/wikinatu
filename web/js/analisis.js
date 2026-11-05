@@ -15,7 +15,7 @@ export function textoVentana(meses, nombres, palabras = { todo: 'todo el año', 
   return `${nombres[meses[0] - 1]} ${palabras.a} ${nombres[meses[meses.length - 1] - 1]}`;
 }
 
-export const enTaiwan = (lat, lon) => lat >= 22 && lat <= 25.5 && lon >= 120 && lon <= 122.2;
+export const enTaiwan = (lat, lon) => lat >= 21.8 && lat <= 25.5 && lon >= 120 && lon <= 122.2;
 
 export function centroDe(puntos) {
   let lat = 0, lon = 0;

@@ -1,0 +1,36 @@
+/* Portada: la sección de la guía, con sus páginas de muestra. */
+
+/* IV. La guía */
+.guia { --fg: var(--crema); --muted: var(--crema); --acento: var(--ambar-2); --linea: #4f9396; --linea-2: #7fb4b4; background: var(--turquesa); }
+.guia-rejilla { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 6vw, 80px); align-items: center; }
+.guia-texto > p { margin-top: .8em; }
+.guia-lista { margin: .7em 0 0; padding: 0; list-style: none; }
+.guia-lista li { padding: 7px 0; border-top: 1px solid var(--linea); }
+.guia-lista li:last-child { border-bottom: 1px solid var(--linea); }
+.guia-paginas { position: relative; height: clamp(420px, 42vw, 560px); }
+.pagina {
+  position: absolute; width: min(56%, 300px); aspect-ratio: 148 / 210; overflow: hidden;
+  background: var(--p-papel); color: var(--p-tinta); padding: 14px; font: 500 .72rem/1.3 var(--text);
+}
+.pagina-portada { left: 0; top: 8%; transform: rotate(-3deg); z-index: 3; }
+.pagina-cuadro { left: 24%; top: 0; z-index: 1; transform: rotate(1.4deg); }
+.pagina-especies { right: 0; top: 11%; transform: rotate(3deg); z-index: 2; }
+.pag-titulo { margin-top: 12px; }
+.pag-titulo small { font: 700 .66rem/1 var(--text); letter-spacing: .12em; text-transform: uppercase; color: var(--p-suave); }
+.pag-titulo h4 { font-size: 1.6rem; line-height: 1.04; margin: 4px 0 6px; }
+.pag-titulo p { margin: 0; font-size: .8rem; }
+.pagina-cuadro svg { display: block; width: 100%; height: auto; }
+.pagina-especies h4 { font-size: 1.14rem; margin-bottom: 8px; }
+.pag-especie { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 8px; padding: 6px 0; border-top: 1px solid var(--p-raya); }
+.pag-especie img { width: 44px; height: 44px; object-fit: cover; display: block; background: var(--p-hueco); }
+.pag-especie b, .pag-especie i, .pag-especie small { display: block; }
+.pag-especie b { font: 400 .86rem/1.12 var(--display); letter-spacing: .015em; text-transform: uppercase; }
+.pag-especie i { font-size: .74rem; font-weight: 400; color: var(--p-suave); }
+.pag-especie small { font-size: .6rem; line-height: 1.2; color: var(--p-suave); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+@media (max-width: 899px) {
+  .guia-rejilla { grid-template-columns: minmax(0, 1fr); }
+  .guia-paginas { height: 112vw; }
+  .pagina { width: 62%; }
+  .pagina-cuadro { left: 19%; }
+}

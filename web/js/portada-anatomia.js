@@ -109,7 +109,7 @@ export function iniciarAnatomia(datos) {
     cuadro?.destruir();
     const maximo = lienzoC.clientWidth >= 760 ? 22 : 9;
     cuadro = dibujarCuadro(lienzoC, datosCuadro(datos, perfil, maximo), {
-      tema: 'noche', etiquetaEje: 'm', alResaltar: (x) => { lam?.resaltar(x); },
+      alResaltar: (x) => { lam?.resaltar(x); },
     });
   }
 
@@ -143,7 +143,7 @@ export function iniciarAnatomia(datos) {
   cuandoCerca(lienzoL, async () => {
     const aspecto = lienzoL.clientWidth >= 760 ? 1.42 : 0.92;
     lam = await crearLamina(lienzoL, { puntos: datos.ruta, nombre: datos.nombre }, {
-      aspecto, rampa: 'noche', marco: true, alResaltar: (x) => { cuadro?.resaltar(x); },
+      aspecto, marco: true, alResaltar: (x) => { cuadro?.resaltar(x); },
     });
     lam.ponerObservaciones(observaciones(datos));
     intervalo = lam.rango?.intervalo ?? null;
@@ -172,7 +172,7 @@ export function iniciarAnatomia(datos) {
   };
 }
 
-/* Páginas de la guía: portada en rampa papel, cuadro y especies reales. */
+/* Páginas de la guía: portada con la lámina, cuadro y especies reales. */
 
 function especieFila(e) {
   const fila = document.createElement('div');
@@ -212,7 +212,7 @@ export function iniciarPaginas(datos) {
     pagEspecies.replaceChildren(nodo('h4', t('pag_especies')), ...lista.map(especieFila));
     if (perfil) {
       cuadro?.destruir();
-      cuadro = dibujarCuadro(pagCuadro, datosCuadro(datos, perfil, 8), { tema: 'papel', ancho: 380, altoMontana: 110 });
+      cuadro = dibujarCuadro(pagCuadro, datosCuadro(datos, perfil, 8), { ancho: 380, altoMontana: 110 });
       pagCuadro.querySelector('svg')?.removeAttribute('width');
       pagCuadro.querySelector('svg')?.removeAttribute('height');
       pagCuadro.querySelectorAll('[tabindex]').forEach((n) => n.removeAttribute('tabindex'));
@@ -221,7 +221,7 @@ export function iniciarPaginas(datos) {
 
   textos();
   cuandoCerca(portada, async () => {
-    const lam = await crearLamina(lienzo, { puntos: datos.ruta, nombre: datos.nombre }, { aspecto: 1.05, rampa: 'papel', marco: false });
+    const lam = await crearLamina(lienzo, { puntos: datos.ruta, nombre: datos.nombre }, { aspecto: 1.05, papel: true, marco: false });
     lam.ponerObservaciones(observaciones(datos));
     perfil = perfilReal(lam, datos);
     textos();

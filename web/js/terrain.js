@@ -158,8 +158,9 @@ export function rangoAlturas(dem) {
 }
 
 // Pinta color por altura, sombreado y curvas de nivel con borde suave.
-// rampa: colores de bajo a alto (temas.css). claro: sombreado suave y curvas oscuras.
-export function pintarRelieve(canvas, dem, { rampa, claro = false, curvas = true, escala = 1 }) {
+// rampa: colores de bajo a alto (base.css). claro: sombreado suave y curvas oscuras.
+// rango { min, max }: reparte la rampa en ese tramo de altitud en vez del de toda la zona.
+export function pintarRelieve(canvas, dem, { rampa, claro = false, curvas = true, escala = 1, rango = null }) {
   const { W, datos, ax, ay, ancho, alto, metrosPx } = dem;
   const w = Math.round(ancho * escala), h = Math.round(alto * escala);
   canvas.width = w; canvas.height = h;
@@ -167,7 +168,7 @@ export function pintarRelieve(canvas, dem, { rampa, claro = false, curvas = true
   const img = ctx.createImageData(w, h);
   const px = img.data;
   const tabla = tablaColor(rampa);
-  const { min, max } = rangoAlturas(dem);
+  const { min, max } = rango || rangoAlturas(dem);
   const inv = 1 / Math.max(1, max - min);
   const intervalo = intervaloCurvas(max - min);
 

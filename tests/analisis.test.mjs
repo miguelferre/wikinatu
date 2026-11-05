@@ -22,6 +22,7 @@ test('el texto de la ventana nombra los extremos', () => {
 
 test('Taiwán activa zh-TW solo en automático', () => {
   assert.equal(enTaiwan(23.51, 120.8), true);
+  assert.equal(enTaiwan(21.99, 120.86), true); // Jialeshui, al sur de Hengchun
   assert.equal(enTaiwan(42.9, -9.1), false);
   assert.equal(localeLocal('auto', { lat: 23.51, lon: 120.8 }), 'zh-TW');
   assert.equal(localeLocal('auto', { lat: 42.9, lon: -9.1 }), null);

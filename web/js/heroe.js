@@ -1,12 +1,12 @@
-// Héroe de la portada: una lámina a oscuras. Una lámpara camina la ruta real, revela el
+// Recorrido de la portada: una plancha a oscuras. Una lámpara camina la ruta real, revela el
 // relieve a su paso y enciende cada especie en el punto donde alguien la vio. Debajo,
-// el perfil va escribiendo el cuadro. Todo son datos de web/data/tristaina.json.
+// una tira de tarjetas guarda las últimas especies. Todo son datos de web/data/tristaina.json.
 
 import { cargarDem, pintarRelieve, lonAX, latAY } from './terrain.js';
 import { cajaDe } from './geo.js';
 import { t, idiomaActual, alCambiarIdioma } from './i18n.js';
 import { grabarCurvas } from './grabado-curvas.js';
-import { dibujarTira, nombreDe, fmt } from './heroe-tira.js';
+import { crearTarjetas, conFoto, nombreDe, fmt } from './heroe-tira.js';
 import { pinturaHeroe } from './temas.js';
 
 const Z = 12;
@@ -16,6 +16,8 @@ const MAX_RES = 1800;       // lado mayor del canvas
 const SEPARACION_AVISOS = 1.7;
 const VIDA_AVISO = 4.2;
 const MAX_AVISOS = 3;
+const SEPARACION_TARJETAS = 2.2; // con una sola tarjeta a la vista, el doble
+const FIJAS = 6;
 
 const COLOR = {};
 let P = null;
@@ -24,9 +26,8 @@ const leerColores = () => {
   const s = getComputedStyle(document.documentElement);
   for (const c of ['plantas', 'herpetos', 'aves', 'mamiferos', 'insectos', 'hongos', 'otros']) COLOR[c] = s.getPropertyValue(`--c-${c}`).trim();
   COLOR.ruta = s.getPropertyValue('--lam-ruta').trim();
-  COLOR.fg = s.getPropertyValue('--fg').trim();
-  COLOR.noche = s.getPropertyValue('--noche').trim();
-  COLOR.oro = s.getPropertyValue('--oro').trim();
+  COLOR.crema = s.getPropertyValue('--crema').trim();
+  COLOR.tinta = s.getPropertyValue('--tinta').trim();
 };
 
 const xALon = (x) => (x / 2 ** Z) * 360 - 180;
@@ -51,7 +52,7 @@ function reticula(ctx, caja, w, h, proy, dpr) {
   ctx.scale(dpr, dpr);
   ctx.strokeStyle = `rgba(${P.hilo},.075)`;
   ctx.lineWidth = 1;
-  ctx.font = '500 11px "Alegreya Sans SC", sans-serif';
+  ctx.font = '500 11.5px Barlow, sans-serif';
   ctx.fillStyle = `rgba(${P.hilo},.55)`;
   const grado = (v, a, b) => {
     const g = Math.floor(v + 1e-9), m = Math.round((v - g) * 60);
@@ -95,7 +96,7 @@ function escala(ctx, caja, w, y, proy, dpr) {
   ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(x, y - 4); ctx.lineTo(x, y); ctx.lineTo(x + largo, y); ctx.lineTo(x + largo, y - 4); ctx.stroke();
   ctx.fillRect(x, y - 1.5, largo / 2, 3);
-  ctx.font = '500 12px "Alegreya Sans", sans-serif'; // en versalitas, m parecería M
+  ctx.font = '600 12.5px Barlow, sans-serif';
   ctx.textAlign = 'right';
   ctx.fillText(`${metros} m`, x + largo, y - 8);
   ctx.textAlign = 'left';
@@ -106,7 +107,7 @@ function escala(ctx, caja, w, y, proy, dpr) {
 
 export function iniciarHeroe(datos) {
   leerColores();
-  const seccion = document.getElementById('arriba');
+  const seccion = document.getElementById('recorrido');
   const base = document.getElementById('heroe-base');
   const luz = document.getElementById('heroe-luz');
   const tinta = document.getElementById('heroe-tinta');
@@ -128,32 +129,53 @@ export function iniciarHeroe(datos) {
 
   let w = 0, h = 0, dpr = 1, proy = null, rutaPx = [], puntosPx = [];
   let relieve = null, mascara = null, mctx = null, escalaM = 1 / 3, radio = 60;
-  let reloj = 0, ultimo = 0, km = 0, siguiente = 0, sellado = 0, indiceSello = 0;
+  let reloj = 0, ultimo = 0, km = 0, siguiente = 0, indiceSello = 0;
   let enPausa = false, visible = true, marcha = false, raf = 0, ultimoAviso = -9;
-  let vistos = new Set(), estallidos = [], activos = [], tira = null, version = 0;
+  let vistos = new Set(), estallidos = [], activos = [], version = 0, ultimaTarjeta = -9;
+  const cajaTarjetas = document.getElementById('heroe-tarjetas');
+  const tarjetas = crearTarjetas(cajaTarjetas);
 
   const sello = (x, y) => {
     const r = radio * escalaM;
     const g = mctx.createRadialGradient(x * escalaM, y * escalaM, 0, x * escalaM, y * escalaM, r);
-    g.addColorStop(0, 'rgba(0,0,0,.2)');
-    g.addColorStop(.55, 'rgba(0,0,0,.09)');
+    g.addColorStop(0, 'rgba(0,0,0,.34)');
+    g.addColorStop(.72, 'rgba(0,0,0,.24)');
     g.addColorStop(1, 'rgba(0,0,0,0)');
     mctx.fillStyle = g;
     mctx.fillRect(x * escalaM - r, y * escalaM - r, r * 2, r * 2);
   };
 
   function reiniciar() {
-    reloj = 0; km = 0; siguiente = 0; sellado = 0; indiceSello = 0; ultimoAviso = -9;
+    reloj = 0; km = 0; siguiente = 0; indiceSello = 0; ultimoAviso = -9; ultimaTarjeta = -9;
     vistos = new Set(); estallidos = [];
     activos.forEach((a) => a.nodo.remove()); activos = [];
     mctx?.clearRect(0, 0, mascara.width, mascara.height);
-    tira?.limpiar();
+    tarjetas.limpiar();
+  }
+
+  // Deja bajada la foto de las dos próximas especies: la tarjeta no debe nacer vacía.
+  function precargar() {
+    const vistas = new Set();
+    for (let i = siguiente; i < puntosPx.length && vistas.size < 2; i++) {
+      const e = especies.get(puntosPx[i].p.taxon);
+      if (vistos.has(e.id) || vistas.has(e.id) || !conFoto(e)) continue;
+      vistas.add(e.id);
+      new Image().src = e.foto.pequena;
+    }
+  }
+
+  function tarjeta(e) {
+    const hueco = SEPARACION_TARJETAS * (tarjetas.cupo() === 1 ? 2 : 1);
+    if (!conFoto(e) || reloj - ultimaTarjeta < hueco) return;
+    ultimaTarjeta = reloj;
+    tarjetas.poner(e);
+    precargar();
   }
 
   function aviso(p, x, y, ahora) {
     const e = especies.get(p.taxon);
     const nodo = document.createElement('div');
-    nodo.className = `heroe-aviso${x > w * 0.72 ? ' izquierda' : ''}`;
+    nodo.className = `heroe-aviso${x > w - 210 ? ' izquierda' : ''}`;
     nodo.style.setProperty('--x', `${x}px`);
     nodo.style.setProperty('--y', `${y}px`);
     nodo.style.setProperty('--color', `var(--c-${e.color})`);
@@ -177,13 +199,13 @@ export function iniciarHeroe(datos) {
       estallidos.push({ x: q.x, y: q.y, color: q.color, t: reloj });
       if (vistos.has(q.p.taxon)) continue;
       vistos.add(q.p.taxon);
+      tarjeta(especies.get(q.p.taxon));
       // Solo las que tienen nombre en el idioma de la página: las demás ya salen en el recuento.
       const conNombre = especies.get(q.p.taxon).nombre[idiomaActual()];
       const libre = conNombre && activos.length < MAX_AVISOS && reloj - ultimoAviso > SEPARACION_AVISOS;
       const lejos = activos.every((a) => Math.hypot(a.x - q.x, a.y - q.y) > 90);
       if (libre && lejos) { aviso(q.p, q.x, q.y, reloj); ultimoAviso = reloj; }
     }
-    tira?.avanzar(km);
     activos = activos.filter((a) => {
       if (reloj < a.hasta) return true;
       a.nodo.classList.add('sale');
@@ -247,15 +269,15 @@ export function iniciarHeroe(datos) {
       const q = puntosPx[i];
       c.beginPath(); c.arc(q.x, q.y, rPunto, 0, 7);
       c.fillStyle = q.color; c.fill();
-      c.lineWidth = 1.5; c.strokeStyle = COLOR.fg; c.stroke();
+      c.lineWidth = 1.5; c.strokeStyle = COLOR.crema; c.stroke();
     }
     // Ruta andada, con casing oscuro.
     if (trazarRuta(c, km)) {
       const [px, py] = posicion(km);
       c.lineTo(px, py);
       c.lineJoin = 'round'; c.lineCap = 'round';
-      c.strokeStyle = `rgba(${P.casing},.85)`; c.lineWidth = 5; c.stroke();
-      c.strokeStyle = COLOR.ruta; c.lineWidth = 2.4; c.stroke();
+      c.strokeStyle = `rgba(${P.casing},.85)`; c.lineWidth = 6; c.stroke();
+      c.strokeStyle = COLOR.ruta; c.lineWidth = 3; c.stroke();
     }
     estallidos = estallidos.filter((e) => reloj - e.t < 1.2);
     for (const e of estallidos) {
@@ -267,8 +289,8 @@ export function iniciarHeroe(datos) {
     if (lampara) {
       const [x, y] = posicion(km);
       c.beginPath(); c.arc(x, y, 5, 0, 7);
-      c.fillStyle = COLOR.fg; c.fill();
-      c.lineWidth = 1.5; c.strokeStyle = COLOR.noche; c.stroke();
+      c.fillStyle = COLOR.tinta; c.fill();
+      c.lineWidth = 2; c.strokeStyle = COLOR.crema; c.stroke();
     }
   }
 
@@ -302,7 +324,7 @@ export function iniciarHeroe(datos) {
     km = total; reloj = SEGUNDOS; siguiente = puntosPx.length; indiceSello = rutaPx.length;
     if (mctx) rutaPx.forEach(([x, y]) => { sello(x, y); sello(x, y); });
     puntosPx.forEach((q) => vistos.add(q.p.taxon));
-    tira?.avanzar(total);
+    tarjetas.fija(datos.especies.filter((e) => conFoto(e) && vistos.has(e.id)).slice(0, FIJAS));
     escribirLectura();
     cuadroDeFrame();
   }
@@ -314,12 +336,13 @@ export function iniciarHeroe(datos) {
     dpr = Math.min(window.devicePixelRatio || 1, 2, MAX_RES / Math.max(w, h));
     for (const c of [base, luz, tinta]) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); }
 
-    tira = dibujarTira(document.getElementById('heroe-cuadro'), datos, { w, h, km: reducido.matches ? total : 0 });
     const ancho = w >= 900;
+    tarjetas.colocar();
+    const techo = cajaTarjetas.getBoundingClientRect().top - caja0.top;
     const texto = document.getElementById('heroe-texto').getBoundingClientRect();
     const seguro = ancho
-      ? { x0: Math.max(texto.right + 40, w * .52), x1: w - 90, y0: 112, y1: Math.min(tira.techo - 8, 112 + h * .47) }
-      : { x0: 28, x1: w - 28, y0: texto.bottom - caja0.top + 14, y1: tira.techo - 4 };
+      ? { x0: Math.max(texto.right + 60, w * .4), x1: w - 90, y0: 48, y1: techo - 22 }
+      : { x0: 28, x1: w - 28, y0: texto.bottom - caja0.top + 14, y1: techo - 12 };
     const e = encuadrar(ruta, w, h, seguro);
     proy = e.proy;
     rutaPx = ruta.map((p) => proy(p.lat, p.lon));
@@ -347,15 +370,11 @@ export function iniciarHeroe(datos) {
       if (mio !== version) return;
       const k = base.width / dem.ancho;
       const plancha = document.createElement('canvas');
-      // Plancha: la misma lámina casi sin color, para que solo se lean las curvas de nivel.
-      const { intervalo } = pintarRelieve(plancha, dem, { rampa: P.fondo, claro: P.claro, curvas: false, escala: k });
+      // Plancha: el relieve casi sin color, para que solo se lean las curvas de nivel.
+      const { intervalo } = pintarRelieve(plancha, dem, { rampa: P.fondo, claro: false, curvas: false, escala: k });
       grabarCurvas(plancha, dem, { curvas: P.curvas, escala: k, unidad: dpr, intervalo, cota: false });
       const c = base.getContext('2d');
       c.drawImage(plancha, 0, 0, base.width, base.height);
-      if (P.lavado) { // en los temas claros el sombreado se aclara: las curvas mandan
-        c.fillStyle = `rgba(${P.velo},${P.lavado})`;
-        c.fillRect(0, 0, base.width, base.height);
-      }
       if (!ancho) { // en pantalla pequeña el grabado pesa más: se baja
         c.fillStyle = `rgba(${P.velo},.42)`;
         c.fillRect(0, 0, base.width, base.height);
@@ -369,16 +388,19 @@ export function iniciarHeroe(datos) {
       c.fillStyle = velo;
       c.fillRect(0, 0, base.width, base.height);
       reticula(c, e.caja, w, h, proy, dpr);
-      escala(c, e.caja, w, ancho ? 88 : seguro.y0 + 6, proy, dpr);
+      escala(c, e.caja, w, ancho ? 52 : seguro.y0 + 6, proy, dpr);
       seccion.dataset.estado = 'relieve';
       await new Promise((r) => setTimeout(r, 30));
       if (mio !== version) return;
       const lleno = document.createElement('canvas');
-      pintarRelieve(lleno, dem, { rampa: P.rampa, claro: P.claro, curvas: true, escala: k });
+      // La rampa se reparte en torno a la ruta: lo revelado es solo su pasillo.
+      const r = datos.resumen;
+      const claro = pintarRelieve(lleno, dem, { rampa: P.rampa, claro: P.claro, curvas: false, escala: k, rango: { min: r.altMin - 30, max: r.altMax + 170 } });
+      grabarCurvas(lleno, dem, { curvas: P.curvasRelieve, escala: k, unidad: dpr, intervalo: claro.intervalo, cota: false });
       relieve = lleno;
       cuadroDeFrame();
     } catch {
-      relieve = null; // sin red: la ruta y las especies siguen sobre el fondo de noche
+      relieve = null; // sin red: la ruta y las especies siguen sobre el fondo oscuro
     }
   }
 
@@ -387,7 +409,6 @@ export function iniciarHeroe(datos) {
     km = Math.min(total, (reloj / SEGUNDOS) * total);
     while (indiceSello < rutaPx.length && ruta[indiceSello].km <= km) { sello(rutaPx[indiceSello][0], rutaPx[indiceSello][1]); indiceSello++; }
     while (siguiente < puntosPx.length && puntosPx[siguiente].p.km <= km) vistos.add(puntosPx[siguiente++].p.taxon);
-    tira?.avanzar(km);
   }
 
   pausa.addEventListener('click', () => {
@@ -415,12 +436,13 @@ export function iniciarHeroe(datos) {
   }).observe(seccion);
 
   alCambiarIdioma(() => {
-    tira?.rotular();
+    tarjetas.rotular();
     activos.forEach((a) => a.nodo.remove()); activos = [];
     escribirLectura();
   });
 
   const r0 = seccion.getBoundingClientRect();
   ultimoW = r0.width; ultimoH = r0.height;
-  return montar().then(actualizarMarcha);
+  // Con la letra ya puesta: si no, la altura del texto y del pie miden mal.
+  return document.fonts.ready.then(montar).then(actualizarMarcha);
 }

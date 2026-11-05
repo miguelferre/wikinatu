@@ -1,41 +1,119 @@
-/* WikiNatu: lámina de atlas antiguo y carta científica moderna. Tokens y base compartidos. */
+/* WikiNatu: dirección Expedición. Tintas planas, Anton y Barlow. Único sitio con los colores. */
 
-@font-face { font-family: "Alegreya"; src: url(../fonts/alegreya-wght-normal.woff2) format("woff2"); font-weight: 400 900; font-style: normal; font-display: swap; }
-@font-face { font-family: "Alegreya"; src: url(../fonts/alegreya-wght-italic.woff2) format("woff2"); font-weight: 400 900; font-style: italic; font-display: swap; }
-@font-face { font-family: "Alegreya Sans"; src: url(../fonts/alegreya-sans-400.woff2) format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
-@font-face { font-family: "Alegreya Sans"; src: url(../fonts/alegreya-sans-400-italic.woff2) format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
-@font-face { font-family: "Alegreya Sans"; src: url(../fonts/alegreya-sans-500.woff2) format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
-@font-face { font-family: "Alegreya Sans"; src: url(../fonts/alegreya-sans-700.woff2) format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
-@font-face { font-family: "Alegreya Sans SC"; src: url(../fonts/alegreya-sans-sc-500.woff2) format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "Anton"; src: url(../fonts/anton-400-normal.woff2) format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Barlow"; src: url(../fonts/barlow-400-normal.woff2) format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Barlow"; src: url(../fonts/barlow-400-italic.woff2) format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "Barlow"; src: url(../fonts/barlow-500-normal.woff2) format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "Barlow"; src: url(../fonts/barlow-600-normal.woff2) format("woff2"); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "Barlow"; src: url(../fonts/barlow-700-normal.woff2) format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
 
 :root {
-  color-scheme: dark;
-  --noche: #0b1d24;
-  --noche-2: #11272f;
-  --noche-3: #18343d;
-  --linea: #2c4a52;
-  --linea-2: #4a6a70;
-  --fg: #f2ead8;
-  --muted: #a9b8b4;
-  --oro: #ecd38a;
-  --ruta: #ff7a59;
+  color-scheme: light;
 
-  /* Paleta categórica validada contra --noche (dataviz, 2026-11-05). El orden es fijo. */
-  --c-plantas: #2ea25f;
-  --c-herpetos: #2f93d6;
-  --c-aves: #e8603c;
-  --c-mamiferos: #a07de8;
-  --c-insectos: #bb8a14;
-  --c-hongos: #de5590;
-  --c-otros: #7d9440;
+  /* Tintas. */
+  --tinta: #14262b;
+  --tinta-2: #1d343b;
+  --tinta-3: #28414a;
+  --papel: #f3e7cd;
+  --papel-2: #eadcbc;
+  --papel-claro: #fdf9ef;
+  --crema: #f7ecd2;
+  --suave: #3d5056;
+  --suave-oscuro: #c4cfc7;
+  --ambar: #f6ad1f;
+  --ambar-2: #fbc65c;
+  --coral: #d9431c;
+  --coral-oscuro: #b8330f;
+  --turquesa: #0d6f74;
+  --velo: rgb(8 18 22 / .78);
 
-  --display: "Alegreya", "Iowan Old Style", Georgia, serif;
-  --text: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
-  --versal: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
+  /* Texto y filetes según el fondo: .oscuro los cambia. */
+  --fg: var(--tinta);
+  --muted: var(--suave);
+  --acento: var(--coral-oscuro);
+  --linea: #cdbd98;
+  --linea-2: #8f8467;
+
+  /* Paleta de grupos validada sobre --papel y el centro de la rampa (dataviz, 2026-11-05). El orden es fijo. */
+  --c-plantas: #008a7e;
+  --c-herpetos: #2b62c9;
+  --c-aves: #d13b12;
+  --c-mamiferos: #b5208c;
+  --c-insectos: #b07400;
+  --c-hongos: #7a36b5;
+  --c-otros: #8a4f0e;
+
+  /* Rampa de relieve, de bajo a alto: la misma en pantalla y en la guía. */
+  --rampa: #93d6cc, #dfeccf, #f8eed3, #fbdc9a, #f5b47c;
+
+  /* Lámina, dentro de la plancha. */
+  --lam-claro: 1;
+  --lam-tinta: var(--tinta);
+  --lam-suave: var(--suave);
+  --lam-halo: rgba(248,238,211,.9);
+  --lam-casing: #f7ecd2;
+  --lam-anillo: #f7ecd2;
+  --lam-blanco: #f7ecd2;
+  --lam-ruta: var(--coral);
+  --lam-vacio: #dfeccf;
+  --lam-mar-fondo: #0d6f74;
+  --lam-mar-fondo2: #1d8585;
+  --lam-mar-linea: #93d6cc;
+  --lam-curva-fina: rgba(20,38,43,.3);
+  --lam-curva-maestra: rgba(20,38,43,.58);
+  --lam-curva-halo: rgba(248,238,211,.92);
+  --lam-curva-cota: #14262b;
+
+  /* Margen de la plancha: oscuro en pantalla, claro en la guía. */
+  --lam-fondo: var(--tinta);
+  --lam-marco: var(--crema);
+  --lam-marco-suave: var(--suave-oscuro);
+  --gui-fondo: var(--papel-claro);
+  --gui-marco: var(--tinta);
+  --gui-marco-suave: var(--suave);
+
+  /* Cuadro: siempre sobre papel. Bandas de abajo arriba en la silueta. */
+  --cua-tinta: var(--tinta);
+  --cua-suave: var(--suave);
+  --cua-anillo: var(--crema);
+  --cua-curva: var(--crema);
+  --cua-bandas: #f6ad1f, #f19a22, #e4542a, #0d6f74, #14262b;
+
+  /* Héroe. hilo y base son r,g,b: el lienzo les pone su transparencia. */
+  --heroe-fondo: #0f1f24, #11242a, #14282f, #162c33, #193138;
+  --heroe-hilo: 247,236,210;
+  --heroe-base: 20,38,43;
+  --heroe-velo: 20,38,43;
+  --heroe-casing: 247,236,210;
+  --heroe-curva-fina: rgba(247,236,210,.2);
+  --heroe-curva-maestra: rgba(247,236,210,.42);
+  --heroe-curva-halo: rgba(20,38,43,.8);
+  --heroe-curva-cota: #f7ecd2;
+
+  /* Páginas impresas y su maqueta en la portada. */
+  --p-papel: var(--papel-claro);
+  --p-tinta: var(--tinta);
+  --p-suave: var(--suave);
+  --p-acento: var(--coral-oscuro);
+  --p-raya: #e0d5b9;
+  --p-hueco: #eadcbc;
+
+  --display: "Anton", "Arial Narrow", Impact, sans-serif;
+  --text: "Barlow", "Segoe UI", system-ui, sans-serif;
   /* Los nombres en chino usan la fuente del sistema. */
   --cjk: "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
 
-  --gut: clamp(16px, 4vw, 56px);
+  --gut: clamp(16px, 3vw, 44px);
+}
+
+.oscuro {
+  --fg: var(--crema);
+  --muted: var(--suave-oscuro);
+  --acento: var(--ambar);
+  --linea: #3a535b;
+  --linea-2: #5f767c;
+  color: var(--fg);
+  background: var(--tinta);
 }
 
 /* reglas-html */
@@ -43,8 +121,6 @@ h1, h2, h3, h4, .titulo { text-wrap: balance; }
 p, li, dd, figcaption, blockquote, .texto { text-wrap: pretty; }
 .num, td.num, th.num, time, .contador, .cifra, [data-num] { font-variant-numeric: lining-nums tabular-nums; }
 .badge, .chip, .etiqueta { text-box: trim-both cap alphabetic; }
-.pestana { display: inline-grid; }
-.pestana::after { content: attr(data-t); font-weight: 700; visibility: hidden; height: 0; overflow: hidden; pointer-events: none; }
 :root {
   --dur-rapida: 80ms; --dur-rapida-salida: 60ms;
   --dur-media: 160ms; --dur-media-salida: 120ms;
@@ -63,23 +139,40 @@ p, li, dd, figcaption, blockquote, .texto { text-wrap: pretty; }
 
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html { background: var(--noche); -webkit-text-size-adjust: 100%; }
+html { background: var(--tinta); -webkit-text-size-adjust: 100%; }
 body {
-  margin: 0; background: var(--noche); color: var(--fg);
-  font: 400 clamp(1.05rem, 1rem + .25vw, 1.18rem)/1.5 var(--text);
-  font-feature-settings: "lnum";
+  margin: 0; background: var(--papel); color: var(--fg);
+  font: 500 clamp(1.03rem, 1rem + .2vw, 1.14rem)/1.55 var(--text);
   overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
-h1, h2, h3, h4 { font-family: var(--display); font-weight: 500; margin: 0; line-height: 1.08; }
+h1, h2, h3, h4 { font-family: var(--display); font-weight: 400; letter-spacing: .012em; margin: 0; line-height: 1.04; text-transform: uppercase; }
 p { margin: 0; }
 p + p { margin-top: .8em; }
 a { color: inherit; text-decoration-color: var(--linea-2); text-underline-offset: .18em; text-decoration-thickness: 1px; }
-a:hover { text-decoration-color: var(--oro); }
+a:hover { text-decoration-color: var(--acento); }
 button { font: inherit; color: inherit; }
-:focus-visible { outline: 2px solid var(--oro); outline-offset: 2px; border-radius: 2px; }
-i, em, .cientifico { font-family: var(--display); font-style: italic; }
-.versal { font-family: var(--versal); font-weight: 500; letter-spacing: .06em; }
+:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
+.cientifico { font-style: italic; font-weight: 400; }
 .zh { font-family: var(--cjk); font-style: normal; }
-.skip { position: absolute; left: -999px; top: 8px; background: var(--oro); color: var(--noche); padding: 6px 12px; z-index: 50; }
+.skip { position: absolute; left: -999px; top: 8px; background: var(--ambar); color: var(--tinta); padding: 6px 12px; z-index: 50; }
 .skip:focus { left: 8px; }
+
+/* Piezas comunes a la portada y al visor. */
+.marca { font: 400 1.5rem/1 var(--display); letter-spacing: .03em; color: var(--fg); text-decoration: none; white-space: nowrap; }
+.boton {
+  display: inline-block; padding: 12px 17px; color: var(--fg); background: none; border: 0; box-shadow: inset 0 0 0 2px currentColor;
+  font: 400 1.06rem/1.05 var(--display); letter-spacing: .04em; text-align: center; text-decoration: none; white-space: nowrap; cursor: pointer;
+  transition: background-color var(--dur-rapida-salida) var(--ease-salida), color var(--dur-rapida-salida) var(--ease-salida);
+}
+.boton:hover { color: var(--tinta); background: var(--ambar); box-shadow: none; transition-duration: var(--dur-rapida); }
+.boton-principal { color: var(--tinta); background: var(--ambar); box-shadow: none; }
+.boton-principal:hover { background: var(--ambar-2); }
+.boton:disabled { color: var(--muted); background: none; box-shadow: inset 0 0 0 2px var(--linea-2); cursor: default; }
+.idioma { display: flex; gap: 2px; }
+.idioma button { min-width: 34px; padding: 7px 6px; color: var(--muted); font: 700 .8rem/1 var(--text); letter-spacing: .06em; background: none; border: 0; cursor: pointer; }
+.idioma button[aria-pressed="true"] { color: var(--papel); background: var(--tinta); }
+.oscuro .idioma button[aria-pressed="true"] { color: var(--tinta); background: var(--crema); }
+.soltar { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: var(--gut); color: var(--tinta); text-align: center; background: var(--ambar); }
+.soltar p { margin: 0; }
+.soltar-titulo, .soltar > p { font: 400 clamp(2.4rem, 1rem + 5vw, 5rem)/1.05 var(--display); text-transform: uppercase; }

@@ -1,7 +1,7 @@
 // Lámina: relieve de la zona con la ruta y las observaciones, con marco, retícula, escala y norte.
 //
 // crearLamina(contenedor, { puntos, nombre }, opciones) es asíncrona.
-// opciones: aspecto, rampa 'noche'|'papel', marco, animarRuta,
+// opciones: aspecto, papel (guía), marco, animarRuta,
 //   alAvanzar(fraccion), alPulsar(taxon), alResaltar(taxon|null), densidad, escala.
 // Devuelve: dem, ponerObservaciones(obs), resaltar(taxon|null), atenuar(si), lienzoComoImagen(tipo, calidad), destruir().
 // Además: progresoRuta(f) dibuja la ruta hasta la fracción f, pausar(), reanudar(),
@@ -38,8 +38,8 @@ function estilos() {
 .lamina .sobre { inset: 0; width: 100%; height: 100%; }
 .lamina.llena canvas { inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .lamina-rotulo { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 3; max-width: 240px;
-  padding: 3px 8px 4px; background: var(--noche); color: var(--fg); border: 1px solid var(--linea-2);
-  font: 500 15px/1.2 var(--display, serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  padding: 3px 8px 4px; background: var(--tinta); color: var(--crema);
+  font: 600 15px/1.2 var(--text, sans-serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   transition: opacity var(--dur-rapida-salida, 60ms) var(--ease-salida, ease); }
 .lamina-rotulo[hidden] { display: block !important; opacity: 0; visibility: hidden; }`;
   document.head.append(s);
@@ -70,9 +70,9 @@ function esquinas(geo, ruta) {
 }
 
 export async function crearLamina(contenedor, { puntos, nombre }, opciones = {}) {
-  const o = { aspecto: null, rampa: 'noche', marco: true, animarRuta: false, ...opciones };
+  const o = { aspecto: null, papel: false, marco: true, animarRuta: false, ...opciones };
   estilos();
-  const tema = pinturaLamina(o.rampa);
+  const tema = pinturaLamina({ papel: o.papel });
   const caja0 = contenedor.getBoundingClientRect();
   const W = caja0.width > 40 ? caja0.width : 1200;
   const llena = !o.marco && caja0.height > 40;
@@ -125,7 +125,7 @@ export async function crearLamina(contenedor, { puntos, nombre }, opciones = {})
     // Unidad: cuántos píxeles de lienzo vale un píxel CSS de la plancha.
     const unidad = base.width / geo.iw;
     if (hayMar) grabarMar(base, dem, { mar: tema.mar, escala, unidad });
-    await document.fonts?.load('italic 500 12px Alegreya').catch(() => {});
+    await document.fonts?.load('italic 400 12px Barlow').catch(() => {});
     grabarCurvas(base, seco, { curvas: tema.curvas, escala, unidad, intervalo: rango.intervalo, cota: o.marco });
     grabarGrano(base, { claro: tema.claro });
   } else {
@@ -178,12 +178,12 @@ export async function crearLamina(contenedor, { puntos, nombre }, opciones = {})
   function dibujarRuta(ctx, u) {
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     trazarRuta(ctx, progreso);
-    ctx.strokeStyle = tema.casing; ctx.lineWidth = 5.4 * u; ctx.globalAlpha = 0.86; ctx.stroke();
+    ctx.strokeStyle = tema.casing; ctx.lineWidth = 6 * u; ctx.globalAlpha = 0.9; ctx.stroke();
     ctx.globalAlpha = 1;
-    ctx.strokeStyle = tema.ruta; ctx.lineWidth = 2.5 * u; ctx.stroke();
+    ctx.strokeStyle = tema.ruta; ctx.lineWidth = 3 * u; ctx.stroke();
     if (progreso < 1) return;
     // Hitos de km: enlazan la lámina con el eje del cuadro.
-    ctx.font = `600 ${11 * u}px Alegreya, serif`;
+    ctx.font = `600 ${11 * u}px Barlow, sans-serif`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for (const { k, p, q } of hitos) {
       const a = Math.atan2(p[1] - q[1], p[0] - q[0]) + Math.PI / 2;

@@ -1,0 +1,34 @@
+/* Visor: indicador de carga y datos que se están actualizando. */
+
+/* Se lee como estado, nunca como «no hay nada». */
+.carga { position: absolute; top: 50%; left: 50%; z-index: 4; width: min(470px, calc(100% - 28px)); padding: 20px 26px 18px; color: var(--crema); background: var(--coral-oscuro); transform: translate(-50%, -50%); animation: carga-entra var(--dur-lenta) var(--ease-entrada); }
+@keyframes carga-entra { from { opacity: 0; } }
+.carga-sup { font: 400 clamp(1.7rem, 1.3rem + 1.5vw, 2.3rem)/1.05 var(--display); letter-spacing: .015em; text-transform: uppercase; text-wrap: balance; }
+.carga-fases { margin: 9px 0 0; padding: 0; list-style: none; font-size: 1rem; font-weight: 500; line-height: 1.5; }
+.carga-fases li { padding-left: 1.25em; }
+.carga-fases .ahora { font-weight: 700; }
+.carga-fases .hecha { position: relative; }
+.carga-fases .hecha::before { content: ""; position: absolute; left: .1em; top: .28em; width: .4em; height: .72em; border: solid currentColor; border-width: 0 2px 2px 0; transform: rotate(40deg); }
+.carga-paso { min-height: 1.4em; margin-top: 7px; font-size: 1rem; font-weight: 600; line-height: 1.35; font-variant-numeric: lining-nums tabular-nums; }
+.carga-nota { margin-top: 9px; font-size: .9rem; line-height: 1.3; }
+.carga-barra { position: relative; height: 8px; margin-top: 10px; overflow: hidden; background: var(--tinta); }
+.carga-barra span { position: absolute; inset: 0; background: var(--ambar); transform: scaleX(var(--f, 0)); transform-origin: left; transition: transform var(--dur-lenta) var(--ease-entrada); }
+/* Latido sobre la barra: entre dos tramos pasa un segundo y no debe parecer colgada. */
+.carga-barra::after { content: ""; position: absolute; inset: 0 auto 0 0; width: 22%; background: var(--crema); opacity: 0; animation: carga-latido 1.8s linear infinite; }
+@keyframes carga-latido { 0% { opacity: 0; transform: translateX(-100%); } 25% { opacity: .35; } 75% { opacity: .35; } 100% { opacity: 0; transform: translateX(460%); } }
+.carga-linea { display: grid; grid-template-columns: minmax(0, 1fr); gap: 5px; margin: 0 0 10px; padding: 8px 12px 9px; background: var(--papel-2); border-left: 4px solid var(--coral); }
+#inventarioCarga { margin-top: 2px; }
+.carga-linea-texto { font-size: 1rem; font-weight: 600; line-height: 1.3; font-variant-numeric: lining-nums tabular-nums; }
+.carga-linea .carga-barra { height: 4px; margin-top: 0; }
+
+/* Lo viejo: el texto pasa al color secundario, sin opacidad. Las figuras sí bajan de tono. */
+.especies.actualizando, .grupos.actualizando { --fg: var(--muted); color: var(--muted); }
+.especies.actualizando img { filter: grayscale(.7) brightness(.8); }
+.cuadro-caja.actualizando { opacity: .42; }
+.especies, .cuadro-caja { transition: opacity var(--dur-media-salida) var(--ease-salida); }
+.especie.fantasma { min-height: 250px; background: var(--papel-2); }
+
+/* El botón desactivado cambia de aspecto tarde: lo que sale de caché no lo hace parpadear. */
+#btnGuia { display: inline-grid; }
+#btnGuia::after { content: attr(data-ancho); height: 0; overflow: hidden; visibility: hidden; }
+#btnGuia:disabled { transition: color var(--dur-media) linear 200ms, background-color var(--dur-media) linear 200ms, box-shadow var(--dur-media) linear 200ms; }
