@@ -20,9 +20,10 @@ body > *:not(#guia), .skip { display: none !important; }
 #guia a { color: inherit; }
 
 /* Portada */
-.g-portada { display: flex; flex-direction: column; height: 193mm; break-after: page; }
-.g-lamina { display: block; width: 100%; height: auto; }
-.g-portada-pie { display: grid; flex: 1; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: start; gap: 6mm; margin-top: 4mm; }
+.g-portada { display: flex; flex-direction: column; height: 193mm; overflow: hidden; break-after: page; }
+/* Un título largo encoge la lámina: el pie nunca salta a la página 2. */
+.g-lamina { display: block; flex: 0 1 auto; min-height: 0; width: 100%; height: auto; object-fit: contain; }
+.g-portada-pie { display: grid; flex: 0 0 auto; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: start; gap: 6mm; margin-top: 4mm; }
 .g-sup { color: var(--p-acento); font: 700 7pt/1.2 var(--text); letter-spacing: .12em; text-transform: uppercase; }
 .g-titulo { margin-top: 1mm; font: 400 20pt/1.04 var(--display); letter-spacing: .012em; text-transform: uppercase; overflow-wrap: anywhere; }
 .g-ventana { margin-top: .8mm; font: 600 10pt/1.2 var(--text); }
