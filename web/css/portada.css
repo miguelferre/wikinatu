@@ -18,33 +18,43 @@ img { max-width: 100%; }
 .barra-nav a:hover { border-color: var(--coral); transition: border-color var(--dur-rapida) var(--ease-entrada); }
 .boton-tinta { padding: 10px 15px; color: var(--crema); font-size: 1rem; background: var(--tinta); box-shadow: none; }
 
-/* Cartel: tres capas, sol, letra y crestas. Las letras caben con aire a cualquier ancho. */
-.cartel { position: relative; height: 47vw; min-height: 300px; overflow: hidden; background: var(--papel); }
-.cartel-sol { position: absolute; right: 9vw; top: 1vw; width: 25vw; height: 25vw; border-radius: 50%; background: var(--ambar); animation: cartel-sube var(--dur-lenta) var(--ease-entrada); }
-.cartel-logo { position: absolute; left: 9vw; top: 2.4vw; width: 82vw; max-width: none; height: auto; animation: cartel-sube var(--dur-lenta) var(--ease-entrada); }
+/* Portada: todo cabe en la primera pantalla. La columna izquierda se estrecha si la ventana es baja,
+   y así el cartel, que depende del ancho, deja sitio al titular. */
+.portada {
+  display: grid; grid-template-columns: minmax(0, min(44%, 72svh)) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto;
+  height: calc(100svh - var(--barra-h)); min-height: 580px;
+}
+.portada-izq { display: flex; flex-direction: column; min-height: 0; container-type: inline-size; background: var(--tinta); }
+
+/* Cartel: tres capas, sol, letra y crestas. Las medidas siguen el ancho de la columna.
+   Si la ventana es alta, crece y las letras se separan de las crestas. */
+.cartel { position: relative; flex: none; height: clamp(47cqw, calc(100svh - var(--barra-h) - 400px), 64cqw); overflow: hidden; background: var(--papel); }
+.cartel-sol { position: absolute; right: 9cqw; top: 1cqw; width: 25cqw; height: 25cqw; border-radius: 50%; background: var(--ambar); animation: cartel-sube var(--dur-lenta) var(--ease-entrada); }
+.cartel-logo { position: absolute; left: 10cqw; top: 2.4cqw; width: 78cqw; max-width: none; height: auto; animation: cartel-sube var(--dur-lenta) var(--ease-entrada); }
 .cartel-crestas { position: absolute; left: 0; bottom: 0; width: 100%; max-width: none; height: auto; }
 @keyframes cartel-sube { from { opacity: 0; transform: translateY(12px); } }
 
-/* Banda oscura */
-.banda { display: grid; grid-template-columns: 1.25fr 1fr; gap: clamp(20px, 4vw, 56px); align-items: center; padding: clamp(26px, 3.4vw, 46px) var(--gut); }
+/* Banda oscura: ocupa lo que deja el cartel. */
+.banda { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: 14px var(--gut) 18px; }
 .antetitulo { color: var(--acento); font-size: .82rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
-.banda h1 { margin-top: 10px; font-size: clamp(2.4rem, 5.2vw, 4.7rem); line-height: 1.02; }
+.banda h1 { margin-top: 8px; font-size: clamp(2.1rem, 8.4cqw, 4.4rem); line-height: 1.02; }
 .banda h1 em { font-style: normal; color: var(--ambar); }
+.entrada { font-size: 1rem; line-height: 1.42; }
 .acciones { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 1em; }
 .aviso-error { margin-top: .8em; color: var(--ambar); max-width: 30em; }
 
 /* Cifras */
-.datos { display: grid; grid-template-columns: repeat(4, 1fr); color: var(--tinta); background: var(--ambar); }
-.datos div { padding: 14px var(--gut); border-left: 3px solid var(--tinta); }
+.datos { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); color: var(--tinta); background: var(--ambar); }
+.datos div { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 10px; padding: 9px var(--gut) 8px; border-left: 3px solid var(--tinta); }
 .datos div:first-child { border-left: 0; }
-.datos b { display: block; font: 400 clamp(1.8rem, 3.4vw, 3rem)/1 var(--display); letter-spacing: .015em; }
+.datos b { display: block; font: 400 clamp(1.6rem, 2.5vw, 2.3rem)/1 var(--display); letter-spacing: .015em; }
 .datos span { font-size: .9rem; font-weight: 600; }
 
 /* Recorrido: plancha a oscuras, la ruta la revela y deja tarjetas. */
 .heroe {
-  position: relative; min-height: max(100svh, 760px); overflow: hidden; isolation: isolate;
-  display: grid; grid-template-rows: 1fr auto auto; gap: 16px;
-  padding: clamp(24px, 4vh, 44px) var(--gut) 0;
+  position: relative; min-height: 0; overflow: hidden; isolation: isolate;
+  display: grid; grid-template-rows: minmax(0, 1fr) auto auto; gap: 14px;
+  padding: clamp(16px, 3vh, 28px) clamp(16px, 2vw, 28px) 0;
 }
 .heroe-capa, .heroe-avisos { position: absolute; inset: 0; width: 100%; height: 100%; }
 .heroe-capa { z-index: -3; }
@@ -52,14 +62,14 @@ img { max-width: 100%; }
 .heroe[data-estado="relieve"] #heroe-base { opacity: 1; }
 .heroe-avisos { z-index: -1; pointer-events: none; overflow: hidden; }
 
-.heroe-texto { align-self: start; max-width: min(27rem, 34vw); }
-.heroe-texto h2 { margin: 8px 0 8px; font-size: clamp(2.4rem, 1.3rem + 3vw, 4.4rem); line-height: 1; }
+.heroe-texto { align-self: start; max-width: 19rem; font-size: .96rem; line-height: 1.36; }
+.heroe-texto h2 { margin: 6px 0; font-size: clamp(1.8rem, 1.2rem + 1.5vw, 2.7rem); line-height: 1; }
 
 /* Tarjetas: cada una en su hueco. Al entrar una nueva, las demás se deslizan a su sitio. */
 .heroe-tarjetas { --n: 4; --hueco: 12px; position: relative; height: 112px; margin: 0; padding: 0; list-style: none; }
 .tarjeta {
   --ancho: calc((100% - var(--hueco) * (var(--n) - 1)) / var(--n));
-  position: absolute; left: 0; top: 0; width: var(--ancho); height: 100%; display: grid; grid-template-columns: 96px minmax(0, 1fr); overflow: hidden;
+  position: absolute; left: 0; top: 0; width: var(--ancho); height: 100%; display: grid; grid-template-columns: 84px minmax(0, 1fr); overflow: hidden;
   color: var(--tinta); background: var(--papel);
   transform: translateX(calc((100% + var(--hueco)) * var(--i, 0)));
   transition: transform var(--dur-lenta) var(--ease-entrada);
@@ -81,13 +91,14 @@ img { max-width: 100%; }
 
 .heroe-pie {
   display: flex; align-items: center; justify-content: space-between; gap: 10px 24px; flex-wrap: wrap;
-  margin: 0 calc(var(--gut) * -1); padding: 10px var(--gut) 12px; font-size: .93rem; font-weight: 600; background: var(--tinta);
+  margin: 0 calc(clamp(16px, 2vw, 28px) * -1); padding: 8px clamp(16px, 2vw, 28px) 10px; font-size: .88rem; font-weight: 600; background: var(--tinta);
 }
 .leyenda { display: flex; flex-wrap: wrap; gap: 3px 14px; margin: 0; padding: 0; list-style: none; }
 .leyenda li { display: inline-flex; align-items: center; gap: 6px; }
 .leyenda i { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 0 1.5px var(--crema); }
 .heroe-mando { display: flex; align-items: center; gap: 14px; white-space: nowrap; }
-#heroe-lectura { color: var(--ambar); font: 400 1.14rem/1 var(--display); letter-spacing: .03em; min-width: 15em; text-align: right; }
+.heroe-mando .boton { padding: 6px 11px; font-size: .94rem; }
+#heroe-lectura { color: var(--ambar); font: 400 1.14rem/1 var(--display); letter-spacing: .03em; min-width: 13.5em; text-align: right; }
 
 /* Avisos sobre la lámina */
 .heroe-aviso {
@@ -105,11 +116,22 @@ img { max-width: 100%; }
 .soltar-nota { margin-top: 6px !important; font-size: 1.1rem; font-weight: 600; }
 .sin-js { padding: 24px; text-align: center; }
 
+/* Ventana baja: tarjetas más bajas, para dejar sitio al mapa. */
+@media (min-width: 900px) and (max-height: 760px) {
+  .heroe-tarjetas { height: 92px; }
+  .tarjeta { grid-template-columns: 78px minmax(0, 1fr); }
+  .tarjeta-foto { display: none; }
+  .banda .antetitulo { display: none; }
+}
+
 @media (max-width: 899px) {
   .barra-nav { display: none; }
   .boton-tinta { margin-left: auto; }
-  .banda { grid-template-columns: minmax(0, 1fr); }
-  .heroe { min-height: max(100svh, 700px); }
+  .portada { display: block; height: auto; min-height: 0; }
+  .cartel { height: 47cqw; }
+  .banda { padding: 22px var(--gut) 26px; }
+  .heroe { min-height: 680px; padding-inline: var(--gut); }
+  .heroe-pie { margin-inline: calc(var(--gut) * -1); padding-inline: var(--gut); }
   .heroe-texto { max-width: none; }
   .heroe-mando { width: 100%; justify-content: space-between; }
   #heroe-lectura { min-width: 0; text-align: left; }

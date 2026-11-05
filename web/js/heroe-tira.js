@@ -35,8 +35,8 @@ export function elegirEspecies(datos, n) {
   return out.sort((a, b) => a.km - b.km);
 }
 
-const ANCHO_MIN = 262; // px de una tarjeta
-const MAX_TARJETAS = 5;
+const ANCHO_MIN = 226; // px de una tarjeta
+const MAX_TARJETAS = 4;
 
 // «(c) Nombre, some rights reserved (CC BY-NC), uploaded by...» pasa a «Nombre, CC BY-NC».
 const credito = (foto) => t('heroe_foto', {

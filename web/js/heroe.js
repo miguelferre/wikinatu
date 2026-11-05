@@ -41,6 +41,7 @@ function encuadrar(ruta, w, h, seguro) {
   const izq = (x0 + x1) / 2 - (seguro.x0 + seguro.x1) / 2 / k;
   const arr = (y0 + y1) / 2 - (seguro.y0 + seguro.y1) / 2 / k;
   return {
+    k,
     caja: { swlng: xALon(izq), nelng: xALon(izq + w / k), nelat: yALat(arr), swlat: yALat(arr + h / k) },
     proy: (lat, lon) => [(lonAX(lon, Z) - izq) * k, (latAY(lat, Z) - arr) * k],
   };
@@ -264,7 +265,7 @@ export function iniciarHeroe(datos) {
       c.beginPath(); c.arc(puntosPx[i].x, puntosPx[i].y, 1.3, 0, 7); c.fill();
     }
     // Especies encendidas: color de su grupo, anillo claro de 1,5 px.
-    const rPunto = w < 900 ? 2.5 : 3.6;
+    const rPunto = w < 600 ? 2.5 : 3.6;
     for (let i = 0; i < siguiente; i++) {
       const q = puntosPx[i];
       c.beginPath(); c.arc(q.x, q.y, rPunto, 0, 7);
@@ -336,13 +337,16 @@ export function iniciarHeroe(datos) {
     dpr = Math.min(window.devicePixelRatio || 1, 2, MAX_RES / Math.max(w, h));
     for (const c of [base, luz, tinta]) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); }
 
-    const ancho = w >= 900;
+    const ancho = w >= 600;
     tarjetas.colocar();
     const techo = cajaTarjetas.getBoundingClientRect().top - caja0.top;
-    const texto = document.getElementById('heroe-texto').getBoundingClientRect();
-    const seguro = ancho
-      ? { x0: Math.max(texto.right + 60, w * .4), x1: w - 90, y0: 48, y1: techo - 22 }
-      : { x0: 28, x1: w - 28, y0: texto.bottom - caja0.top + 14, y1: techo - 12 };
+    const caja = document.getElementById('heroe-texto').getBoundingClientRect();
+    const texto = { right: caja.right - caja0.left, bottom: caja.bottom - caja0.top };
+    // La ruta va junto al texto o debajo de él: gana el sitio donde se dibuja más grande.
+    const alLado = { x0: texto.right + 40, x1: w - 70, y0: 48, y1: techo - 22 };
+    const debajo = { x0: 28, x1: w - 40, y0: texto.bottom + 14, y1: techo - 12 };
+    const lado = ancho && encuadrar(ruta, w, h, alLado).k > encuadrar(ruta, w, h, debajo).k;
+    const seguro = lado ? alLado : debajo;
     const e = encuadrar(ruta, w, h, seguro);
     proy = e.proy;
     rutaPx = ruta.map((p) => proy(p.lat, p.lon));
@@ -380,8 +384,8 @@ export function iniciarHeroe(datos) {
         c.fillRect(0, 0, base.width, base.height);
       }
       // El grabado se apaga bajo el texto.
-      const fin = ancho ? (texto.right + 90) * dpr : (texto.bottom - caja0.top + 30) * dpr;
-      const velo = ancho ? c.createLinearGradient(0, 0, fin, 0) : c.createLinearGradient(0, 0, 0, fin);
+      const fin = lado ? (texto.right + 90) * dpr : (texto.bottom + 30) * dpr;
+      const velo = lado ? c.createLinearGradient(0, 0, fin, 0) : c.createLinearGradient(0, 0, 0, fin);
       velo.addColorStop(0, `rgba(${P.velo},.9)`);
       velo.addColorStop(.72, `rgba(${P.velo},.78)`);
       velo.addColorStop(1, `rgba(${P.velo},0)`);
