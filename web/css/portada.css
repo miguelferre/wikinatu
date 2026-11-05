@@ -1,0 +1,273 @@
+/* Portada de WikiNatu. Tokens en base.css. */
+
+:root { --barra-h: 52px; --ancho: 1240px; }
+
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--barra-h) + 16px); }
+button { background: none; border: 0; padding: 0; cursor: pointer; }
+canvas { display: block; }
+
+/* Cabecera */
+.barra {
+  position: fixed; inset: 0 0 auto; z-index: 20; height: var(--barra-h);
+  display: flex; align-items: center; gap: clamp(12px, 2.4vw, 32px);
+  padding: 0 var(--gut); background: var(--noche); border-bottom: 1px solid var(--linea);
+}
+.marca { font: 500 1.34rem/1 var(--display); text-decoration: none; letter-spacing: .005em; }
+.marca span { font-style: italic; color: var(--oro); }
+.barra-nav { display: flex; gap: clamp(14px, 2vw, 28px); margin-left: auto; font-size: .96rem; }
+.barra-nav a { color: var(--muted); text-decoration: none; transition: color var(--dur-rapida-salida) var(--ease-salida); }
+.barra-nav a:hover { color: var(--fg); transition: color var(--dur-rapida) var(--ease-entrada); }
+.barra-cta {
+  font: 500 .92rem/1 var(--text); text-decoration: none; white-space: nowrap;
+  padding: 8px 12px; border: 1px solid var(--linea-2);
+  transition: border-color var(--dur-rapida-salida) var(--ease-salida);
+}
+.barra-cta:hover { border-color: var(--oro); transition: border-color var(--dur-rapida) var(--ease-entrada); }
+.idioma { display: flex; gap: 2px; font: 500 .84rem/1 var(--versal); letter-spacing: .05em; }
+.idioma button { padding: 7px 7px; color: var(--muted); }
+.idioma button[aria-pressed="true"] { color: var(--noche); background: var(--fg); }
+
+/* Botones */
+.boton {
+  display: inline-block; padding: 12px 18px; font: 500 1.02rem/1.1 var(--text); text-decoration: none; text-align: center;
+  color: var(--fg); background: var(--noche); border: 1px solid var(--linea-2); cursor: pointer;
+  transition: border-color var(--dur-rapida-salida) var(--ease-salida), background var(--dur-rapida-salida) var(--ease-salida);
+}
+.boton:hover { border-color: var(--oro); transition: border-color var(--dur-rapida) var(--ease-entrada); }
+.boton-principal { background: var(--oro); color: var(--noche); border-color: var(--oro); }
+.boton-principal:hover { background: var(--fg); border-color: var(--fg); transition: background var(--dur-rapida) var(--ease-entrada); }
+.enlace { color: var(--fg); text-decoration: underline; text-decoration-color: var(--linea-2); text-underline-offset: .18em; }
+.enlace:hover { text-decoration-color: var(--oro); }
+
+/* I. Héroe */
+.heroe {
+  position: relative; min-height: max(100svh, 800px); overflow: hidden; isolation: isolate;
+  display: grid; grid-template-rows: 1fr auto;
+  padding: calc(var(--barra-h) + clamp(20px, 7vh, 76px)) var(--gut) 0;
+  background: var(--noche);
+}
+.heroe-capa, .heroe-cuadro, .heroe-avisos { position: absolute; inset: 0; width: 100%; height: 100%; }
+.heroe-capa { z-index: -3; }
+#heroe-base { opacity: 0; transition: opacity var(--dur-lenta) var(--ease-entrada); }
+.heroe[data-estado="relieve"] #heroe-base { opacity: 1; }
+.heroe-cuadro { z-index: -2; pointer-events: none; }
+.heroe-avisos { z-index: -1; pointer-events: none; overflow: hidden; }
+
+.heroe-texto { align-self: start; max-width: min(40rem, 44vw); }
+.antetitulo { color: var(--oro); font-size: 1rem; }
+.heroe h1 {
+  font-size: clamp(3rem, min(1rem + 5.6vw, 11.4vh), 6.6rem); line-height: .98; letter-spacing: -.012em;
+  margin: .2em 0 .3em;
+}
+.heroe h1 em { display: block; color: var(--oro); font-weight: 500; }
+.entrada { max-width: 29em; font-size: clamp(1.1rem, 1rem + .4vw, 1.3rem); line-height: 1.42; }
+.acciones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1.3em; }
+.aviso-error { margin-top: .8em; color: var(--oro); max-width: 30em; }
+
+.heroe-pie {
+  grid-row: 2; position: relative; display: flex; align-items: center; justify-content: space-between; gap: 10px 24px; flex-wrap: wrap;
+  margin: 0 calc(var(--gut) * -1); padding: 10px var(--gut) 12px; border-top: 1px solid var(--linea);
+  background: var(--noche); font-size: .93rem; color: var(--muted);
+}
+.leyenda { display: flex; flex-wrap: wrap; gap: 3px 14px; margin: 0; padding: 0; list-style: none; }
+.leyenda li { display: inline-flex; align-items: center; gap: 6px; }
+.leyenda i { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 0 1.5px var(--fg); }
+.heroe-rotulo { flex: 1 1 18em; text-align: right; }
+.heroe-mando { display: flex; align-items: baseline; gap: 14px; white-space: nowrap; min-height: 1.6em; }
+#heroe-lectura { color: var(--fg); min-width: 15.5em; text-align: right; }
+
+/* Tira del cuadro */
+.tira-monte { fill: var(--noche); }
+.tira-cresta { fill: none; stroke: var(--fg); stroke-width: 1.2; }
+.tira-andada { fill: none; stroke: var(--ruta); stroke-width: 2.4; stroke-linejoin: round; }
+.tira-pluma { fill: none; stroke: var(--linea-2); stroke-width: 1; }
+.tira-pluma.fina { stroke: var(--linea); }
+.tira-marca { stroke: var(--linea-2); }
+.tira-km { fill: var(--muted); font: 400 12.5px var(--text); font-variant-numeric: lining-nums tabular-nums; }
+.tira-caminante { fill: var(--fg); stroke: var(--noche); stroke-width: 1.5; }
+.tira-caminante.llega { opacity: 0; }
+.tira-etiqueta { opacity: 0; transition: opacity var(--dur-lenta-salida) var(--ease-salida); }
+.tira-etiqueta.encendida { opacity: 1; transition: opacity var(--dur-lenta) var(--ease-entrada); }
+.tira-guia { fill: none; stroke: var(--linea-2); stroke-width: 1; }
+.tira-punto { stroke: var(--fg); stroke-width: 1.5; }
+.tira-nombre { fill: var(--fg); font: 500 15px var(--display); paint-order: stroke; stroke: var(--noche); stroke-width: 3px; stroke-linejoin: round; }
+.tira-cientifico { fill: var(--muted); font: italic 400 12.5px var(--display); }
+
+/* Avisos sobre la lámina */
+.heroe-aviso {
+  position: absolute; left: 0; top: 0; transform: translate(var(--x), var(--y)) translate(14px, -50%);
+  display: flex; flex-direction: column; padding: 4px 8px 5px; white-space: nowrap;
+  background: var(--noche); border: 1px solid var(--color); line-height: 1.16;
+  animation: aviso-entra var(--dur-lenta) var(--ease-entrada);
+}
+.heroe-aviso.izquierda { transform: translate(var(--x), var(--y)) translate(calc(-100% - 14px), -50%); }
+.heroe-aviso.sale { opacity: 0; transition: opacity var(--dur-lenta-salida) var(--ease-salida); }
+.heroe-aviso b { font: 500 1.02rem/1.15 var(--display); }
+.heroe-aviso i { font-size: .84rem; color: var(--muted); }
+@keyframes aviso-entra { from { opacity: 0; } }
+
+/* Soltar un GPX */
+.soltar { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: var(--gut); background: var(--noche); }
+.soltar-marco {
+  width: 100%; height: 100%; display: grid; place-content: center; text-align: center; gap: 6px;
+  border: 1px solid var(--oro); outline: 3px solid var(--oro); outline-offset: 5px; color: var(--muted);
+}
+.soltar-titulo { font: 500 clamp(2.4rem, 1rem + 5vw, 5rem)/1 var(--display); color: var(--fg); }
+.sin-js { padding: 24px; text-align: center; }
+
+@media (min-width: 900px) and (max-width: 1279px) {
+  .heroe { min-height: max(100svh, 880px); }
+  .heroe-rotulo { display: none; }
+}
+
+@media (max-width: 899px) {
+  .barra-nav { display: none; }
+  .barra-cta { margin-left: auto; }
+  .heroe { min-height: max(100svh, 720px); padding-top: calc(var(--barra-h) + 16px); }
+  .antetitulo { display: none; }
+  .heroe-texto { max-width: none; }
+  .heroe h1 { font-size: clamp(2.7rem, 12.4vw, 4.6rem); margin-top: 0; }
+  .entrada { font-size: 1.06rem; }
+  .heroe-pie { font-size: .86rem; }
+  .heroe-rotulo { display: none; }
+  .heroe-mando { width: 100%; justify-content: space-between; }
+  #heroe-lectura { min-width: 0; text-align: left; }
+  .tira-nombre { font-size: 13.5px; }
+  .tira-km { font-size: 11.5px; }
+  .heroe-aviso b { font-size: .95rem; }
+}
+
+/* Secciones */
+.seccion { max-width: calc(var(--ancho) + var(--gut) * 2); margin: 0 auto; padding: clamp(72px, 10vw, 132px) var(--gut) 0; }
+.seccion-cabeza { margin-bottom: clamp(24px, 3.4vw, 44px); }
+.ordinal { color: var(--oro); font-size: 1.02rem; margin-bottom: .5em; }
+.seccion h2 { font-size: clamp(2.3rem, 1.3rem + 3.2vw, 4.2rem); line-height: 1.02; letter-spacing: -.008em; }
+.seccion-entrada { margin-top: .8em; max-width: 36em; color: var(--muted); }
+.nota { color: var(--muted); font-size: .95em; }
+.figura { margin: 0; }
+.figura figcaption { margin-top: 12px; color: var(--muted); font-size: .92rem; max-width: 62em; }
+.figura figcaption b { color: var(--fg); margin-right: .3em; }
+
+/* I. La idea */
+.idea-texto { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(28px, 5vw, 72px); align-items: start; }
+.idea-grande { font: 400 clamp(1.45rem, 1.1rem + 1.15vw, 2.05rem)/1.28 var(--display); }
+.idea-resto em { color: var(--fg); }
+.idea-figura { margin-top: clamp(32px, 5vw, 60px); }
+.corte { min-height: 340px; }
+.corte svg { display: block; width: 100%; height: auto; }
+.corte.vacio { min-height: 0; }
+.corte-nivel { stroke: var(--linea); stroke-dasharray: 1 5; }
+.corte-canto { stroke: var(--linea-2); fill: none; }
+.corte-m { fill: var(--muted); font: 400 12.5px var(--text); font-variant-numeric: lining-nums tabular-nums; }
+.corte-monte { fill: var(--noche-2); }
+.corte-pluma { fill: none; stroke: var(--linea-2); stroke-width: 1; }
+.corte-cresta { fill: none; stroke: var(--fg); stroke-width: 1.3; stroke-linejoin: round; }
+.corte-tramo { stroke: var(--ruta); stroke-width: 3; stroke-linecap: round; }
+.corte-punto { stroke: var(--fg); stroke-width: 1.5; }
+.corte-punto.oro { fill: var(--oro); }
+.corte-punto.ruta { fill: var(--ruta); }
+.corte-guia { fill: none; stroke: var(--linea-2); }
+.corte-escala { fill: none; stroke: var(--muted); }
+.corte-rotulo { fill: var(--fg); font: 500 16px var(--display); paint-order: stroke; stroke: var(--noche); stroke-width: 3px; }
+@media (max-width: 759px) { .corte-rotulo { font-size: 14px; } }
+
+/* II. Cómo se lee */
+.anatomia { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 300px); gap: clamp(20px, 3vw, 40px); align-items: start; }
+.anatomia-baja { grid-template-columns: minmax(0, 1fr); margin-top: clamp(28px, 4vw, 48px); }
+.anatomia figure { position: relative; min-width: 0; }
+.anatomia-lienzo { min-height: 240px; }
+.anatomia-lienzo svg { display: block; max-width: 100%; height: auto; }
+.llamadas { position: absolute; inset: 0 0 auto; pointer-events: none; }
+.llamada { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 6px; transform: translate(var(--x), var(--y)) translate(0, -50%); white-space: nowrap; }
+.llamada.izquierda { flex-direction: row-reverse; transform: translate(var(--x), var(--y)) translate(-100%, -50%); }
+.llamada-texto { padding: 1px 7px 2px; background: var(--noche); color: var(--fg); font: 500 .96rem/1.25 var(--display); }
+.llamada-num {
+  flex: none; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--oro); color: var(--noche); font: 700 .8rem/1 var(--text);
+}
+.partes { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; font-size: .98rem; }
+.partes li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; }
+.partes b { font-weight: 700; }
+.partes-fila { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 3vw, 40px); margin-top: 8px; }
+.foco-titulo { margin-top: 24px; color: var(--oro); font-size: .96rem; }
+.especies-foco { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
+.especies-foco button {
+  display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px; border: 1px solid var(--linea-2); font-size: .95rem;
+  transition: border-color var(--dur-rapida-salida) var(--ease-salida);
+}
+.especies-foco button:hover { border-color: var(--oro); transition: border-color var(--dur-rapida) var(--ease-entrada); }
+.especies-foco button[aria-pressed="true"] { background: var(--fg); color: var(--noche); border-color: var(--fg); }
+.especies-foco i { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 0 1.5px var(--fg); }
+
+/* III. Mes y sesgo */
+.mes-rejilla { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 88px); align-items: start; }
+.mes-rejilla > div > p { font: 400 clamp(1.2rem, 1.05rem + .5vw, 1.42rem)/1.32 var(--display); min-height: 5.4em; }
+.mes-rejilla .figura { margin-top: 20px; }
+.embudo { display: grid; gap: 14px; margin: 0; }
+.embudo dt { font-size: .96rem; color: var(--muted); margin-bottom: 3px; }
+.embudo dd { display: flex; align-items: center; gap: 10px; margin: 0; }
+.embudo span { flex: 0 0 auto; width: calc((100% - 64px) * var(--f)); height: 30px; background: var(--oro); }
+.embudo b { font: 500 1.5rem/1 var(--display); font-variant-numeric: lining-nums tabular-nums; }
+.barras { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 4px; height: 212px; border-bottom: 1px solid var(--linea-2); padding-bottom: 0; position: relative; margin-bottom: 26px; }
+.barra-mes { position: relative; display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; }
+.barra-mes b { display: block; text-align: center; font: 500 .95rem/1.5 var(--text); }
+.barra-mes span { display: block; height: calc((100% - 24px) * var(--f)); background: var(--oro); }
+.barra-mes i { position: absolute; left: 0; right: 0; bottom: -24px; text-align: center; font: 500 .9rem/1.4 var(--versal); color: var(--muted); }
+.limites { margin-top: clamp(44px, 6vw, 76px); padding-top: 22px; border-top: 1px solid var(--linea); }
+.limites h3 { font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem); margin-bottom: 18px; }
+.limites dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 4vw, 56px); margin: 0; }
+.limites dt { font: italic 500 1.2rem/1.2 var(--display); color: var(--oro); margin-bottom: 6px; }
+.limites dd { margin: 0; color: var(--muted); }
+
+/* IV. La guía */
+.guia-rejilla { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 6vw, 80px); align-items: center; }
+.guia-texto > p { margin-top: .8em; }
+.guia-lista { margin: .7em 0 0; padding: 0; list-style: none; }
+.guia-lista li { padding: 7px 0; border-top: 1px solid var(--linea); }
+.guia-lista li:last-child { border-bottom: 1px solid var(--linea); }
+.guia-paginas { position: relative; height: clamp(420px, 42vw, 560px); }
+.pagina {
+  position: absolute; width: min(56%, 300px); aspect-ratio: 148 / 210; overflow: hidden;
+  background: #fdfbf5; color: #26363a; padding: 14px; font: 400 .72rem/1.3 var(--text);
+  outline: 1px solid var(--linea-2);
+}
+.pagina-portada { left: 0; top: 8%; transform: rotate(-3deg); z-index: 3; }
+.pagina-cuadro { left: 24%; top: 0; z-index: 1; transform: rotate(1.4deg); }
+.pagina-especies { right: 0; top: 11%; transform: rotate(3deg); z-index: 2; }
+.pag-lamina { outline: 1px solid #c3cec9; }
+.pag-titulo { margin-top: 12px; }
+.pag-titulo small { font: 500 .78rem/1 var(--versal); letter-spacing: .06em; color: #55666a; }
+.pag-titulo h4 { font-size: 1.5rem; line-height: 1.05; margin: 4px 0 6px; }
+.pag-titulo p { margin: 0; font-size: .8rem; }
+.pagina-cuadro svg { display: block; width: 100%; height: auto; }
+.pagina-especies h4 { font-size: 1.08rem; margin-bottom: 8px; }
+.pag-especie { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 8px; padding: 6px 0; border-top: 1px solid #d9dfda; }
+.pag-especie img { width: 44px; height: 44px; object-fit: cover; display: block; background: #e6e9e2; }
+.pag-especie b, .pag-especie i, .pag-especie small { display: block; }
+.pag-especie b { font: 500 .86rem/1.1 var(--display); }
+.pag-especie i { font-size: .74rem; color: #55666a; }
+.pag-especie small { font-size: .6rem; line-height: 1.2; color: #55666a; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* V. Método */
+.metodo-lista { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px clamp(20px, 4vw, 56px); margin: 0; }
+.metodo-lista dt { font: 500 1.16rem/1.2 var(--display); margin-bottom: 5px; }
+.metodo-lista dd { margin: 0; color: var(--muted); font-size: .98rem; }
+.creditos { margin-top: clamp(36px, 5vw, 60px); padding-top: 20px; border-top: 1px solid var(--linea); max-width: 52em; color: var(--muted); }
+.creditos h3 { font-size: 1.3rem; color: var(--fg); margin-bottom: 8px; }
+
+.pie {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 24px; justify-content: space-between;
+  max-width: calc(var(--ancho) + var(--gut) * 2); margin: clamp(64px, 8vw, 104px) auto 0; padding: 18px var(--gut) 26px;
+  border-top: 1px solid var(--linea); color: var(--muted); font-size: .94rem;
+}
+
+@media (max-width: 899px) {
+  .idea-texto, .mes-rejilla, .guia-rejilla, .anatomia { grid-template-columns: minmax(0, 1fr); }
+  .mes-rejilla > div > p { min-height: 0; }
+  .limites dl, .metodo-lista, .partes-fila { grid-template-columns: minmax(0, 1fr); }
+  .llamada-texto { display: none; }
+  .llamada.izquierda { transform: translate(var(--x), var(--y)) translate(-100%, -50%); }
+  .guia-paginas { height: 112vw; }
+  .pagina { width: 62%; }
+  .pagina-cuadro { left: 19%; }
+}

@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WikiNatu: lo que vive junto a tu camino</title>
+<meta name="description" content="Suelta un GPX y WikiNatu dibuja el cuadro de la naturaleza de tu ruta: relieve, perfil con las especies a su altura, inventario y guía en PDF, con observaciones de iNaturalist.">
+<meta name="theme-color" content="#0b1d24">
+<meta property="og:type" content="website">
+<meta property="og:title" content="WikiNatu: lo que vive junto a tu camino">
+<meta property="og:description" content="El cuadro de la naturaleza de tu ruta, al modo de Humboldt, con observaciones de iNaturalist.">
+<meta property="og:url" content="https://miguelferre.github.io/wikinatu/">
+<meta property="og:image" content="https://miguelferre.github.io/wikinatu/data/og.jpg">
+<meta property="og:locale" content="es_ES">
+<meta property="og:locale:alternate" content="en_GB">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230b1d24'/%3E%3Cg fill='none' stroke='%23ecd38a' stroke-width='1.2'%3E%3Cpath d='M3 24c5-1 7-9 13-13s10-3 13-1'/%3E%3Cpath d='M3 29c6-1 9-8 14-11s9-3 12-2' opacity='.6'/%3E%3C/g%3E%3Ccircle cx='16' cy='11' r='3' fill='%23ff7a59' stroke='%23f2ead8' stroke-width='1.2'/%3E%3C/svg%3E">
+<link rel="preload" href="data/tristaina.json" as="fetch" crossorigin="anonymous">
+<link rel="preload" href="fonts/alegreya-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/portada.css">
+<script type="module" src="js/portada.js"></script>
+</head>
+<body>
+<a class="skip" href="#idea" data-t="saltar">Saltar al contenido</a>
+
+<header class="barra">
+  <a class="marca" href="#arriba" aria-label="WikiNatu">Wiki<span>Natu</span></a>
+  <nav class="barra-nav" data-t-aria="nav_etiqueta" aria-label="Secciones">
+    <a href="#idea" data-t="nav_idea">La idea</a>
+    <a href="#lectura" data-t="nav_lectura">Cómo se lee</a>
+    <a href="#mes" data-t="nav_mes">Mes y sesgo</a>
+    <a href="#guia" data-t="nav_guia">La guía</a>
+    <a href="#metodo" data-t="nav_metodo">Método</a>
+  </nav>
+  <a class="barra-cta" href="ruta.html" data-t="nav_visor">Abrir el visor</a>
+  <div class="idioma" role="group" aria-label="Idioma / Language">
+    <button type="button" data-lang="es" aria-pressed="true">ES</button>
+    <button type="button" data-lang="en" aria-pressed="false">EN</button>
+  </div>
+</header>
+
+<main>
+
+<!-- I. Héroe: una lámina a oscuras. La lámpara del caminante revela el relieve y escribe el cuadro.
+  Lagos de Tristaina, en Andorra: https://visitandorra.com/en/nature--sports/hiking-route-estanys-de-tristaina (consultado el 2026-11-05). -->
+<section class="heroe" id="arriba" data-estado="cargando">
+  <canvas class="heroe-capa" id="heroe-base" aria-hidden="true"></canvas>
+  <canvas class="heroe-capa" id="heroe-luz" aria-hidden="true"></canvas>
+  <canvas class="heroe-capa" id="heroe-tinta" aria-hidden="true"></canvas>
+  <div class="heroe-avisos" id="heroe-avisos" aria-hidden="true"></div>
+  <svg class="heroe-cuadro" id="heroe-cuadro" aria-hidden="true"></svg>
+
+  <div class="heroe-texto" id="heroe-texto">
+    <p class="antetitulo versal" data-t="heroe_ante">El cuadro de la naturaleza de una ruta</p>
+    <h1 data-t-html="heroe_titulo">Lo que vive <em>junto a tu camino</em></h1>
+    <p class="entrada" data-t="heroe_entrada">Suelta un GPX. WikiNatu cruza tu ruta con las observaciones de iNaturalist y dibuja su relieve, sus especies a su altura y una guía para llevar.</p>
+    <p class="acciones">
+      <button type="button" class="boton boton-principal" data-gpx-elegir data-t="heroe_soltar">Soltar un GPX</button>
+      <a class="boton" href="ruta.html?ruta=tristaina&amp;mes=7" data-t="heroe_ejemplo">Ver el ejemplo</a>
+    </p>
+    <p class="aviso-error" id="gpx-error" role="alert" hidden></p>
+  </div>
+
+  <div class="heroe-pie">
+    <ul class="leyenda" id="heroe-leyenda" data-t-aria="leyenda_etiqueta" aria-label="Grupos"></ul>
+    <p class="heroe-rotulo" id="heroe-rotulo"></p>
+    <p class="heroe-mando">
+      <span class="num" id="heroe-lectura"></span>
+      <button type="button" class="enlace" id="heroe-pausa" aria-pressed="false" data-t="heroe_pausa">Pausar</button>
+    </p>
+  </div>
+</section>
+
+<!-- II. La idea.
+  Fuentes consultadas el 2026-11-05:
+  Ascenso, junio de 1802, Humboldt, Bonpland y Montúfar, 5.878 m, marca para un occidental: https://en.wikipedia.org/wiki/Alexander_von_Humboldt
+  (https://en.wikipedia.org/wiki/Chimborazo da 5.875 m; la Biodiversity Heritage Library da 19.413 pies: https://blog.biodiversitylibrary.org/2020/10/alexander-von-humboldt)
+  Chimborazo, 6.263 m y coordenadas de la cima: https://en.wikipedia.org/wiki/Chimborazo
+  Boceto del Naturgemälde tras bajar, "cuadro de la naturaleza": https://www.sciencefriday.com/articles/from-atop-an-ecuadorian-peak-an-epiphany-about-nature
+  Publicación en 1807 (la portada del Essai lleva 1805): https://www.avhumboldt.de?p=11781 y https://biotech.law.lsu.edu/blog/PNAS-2015-Morueta-Holme-1509938112.pdf
+  Plantas de otros lugares en el Tableau: el mismo artículo de PNAS (2015), material y métodos.
+  Corte visto desde el sur, oeste a la izquierda: https://gsp.humboldt.edu/olm/Courses/GSP_510/Articles/Alexander_von_Humboldt,_Aime_Bonpland-Essay_on_the_Geography_of_Plants-University_Of_Chicago_Press(2009).pdf
+  Imagen original, dominio público (Public Domain Mark 1.0): https://commons.wikimedia.org/wiki/File:Zentralbibliothek_Z%C3%BCrich_-_Ideen_zu_einer_Geographie_der_Pflanzen_nebst_einem_Naturgem%C3%A4lde_der_Tropenl%C3%A4nder_-_000012142.jpg
+-->
+<section class="seccion idea" id="idea">
+  <header class="seccion-cabeza">
+    <p class="ordinal versal" data-t="idea_ordinal"></p>
+    <h2 data-t="idea_titulo"></h2>
+  </header>
+  <div class="idea-texto">
+    <p class="idea-grande" data-t-html="idea_p1"></p>
+    <div class="idea-resto">
+      <p data-t-html="idea_p2"></p>
+      <p data-t-html="idea_p3"></p>
+      <p class="nota" data-t-html="idea_nota"></p>
+    </div>
+  </div>
+  <figure class="figura idea-figura">
+    <div class="corte" id="corte" role="img" data-t-aria="corte_alt"></div>
+    <figcaption><b class="versal" data-t="fig1"></b> <span id="corte-pie"></span></figcaption>
+  </figure>
+</section>
+
+<!-- III. Cómo se lee: los módulos reales de lámina y cuadro, con datos de Tristaina. -->
+<section class="seccion lectura" id="lectura">
+  <header class="seccion-cabeza">
+    <p class="ordinal versal" data-t="lectura_ordinal"></p>
+    <h2 data-t="lectura_titulo"></h2>
+    <p class="seccion-entrada" data-t="lectura_entrada"></p>
+  </header>
+  <div class="anatomia">
+    <figure class="figura anatomia-lamina">
+      <div class="anatomia-lienzo" id="anatomia-lamina"></div>
+      <div class="llamadas" id="llamadas-lamina" aria-hidden="true"></div>
+      <figcaption><b class="versal" data-t="fig2"></b> <span id="lamina-pie"></span></figcaption>
+    </figure>
+    <div class="anatomia-lado">
+      <ol class="partes" id="partes-lamina"></ol>
+      <p class="foco-titulo versal" data-t="foco_etiqueta"></p>
+      <div class="especies-foco" id="especies-foco" role="group" data-t-aria="foco_etiqueta"></div>
+    </div>
+  </div>
+  <div class="anatomia anatomia-baja">
+    <figure class="figura anatomia-cuadro">
+      <div class="anatomia-lienzo" id="anatomia-cuadro"></div>
+      <div class="llamadas" id="llamadas-cuadro" aria-hidden="true"></div>
+      <figcaption><b class="versal" data-t="fig3"></b> <span data-t="cuadro_pie"></span></figcaption>
+    </figure>
+    <ol class="partes partes-fila" id="partes-cuadro" start="6"></ol>
+  </div>
+</section>
+
+<!-- IV. Mes y sesgo. Hermanas: medido el 2026-11-05 (plan de WikiNatu 2). Tristaina: web/data/tristaina.json. -->
+<section class="seccion mes" id="mes">
+  <header class="seccion-cabeza">
+    <p class="ordinal versal" data-t="mes_ordinal"></p>
+    <h2 data-t="mes_titulo"></h2>
+  </header>
+  <div class="mes-rejilla">
+    <div class="mes-hermanas">
+      <p data-t-html="mes_p1"></p>
+      <figure class="figura">
+        <dl class="embudo" id="embudo"></dl>
+        <figcaption><b class="versal" data-t="fig4"></b> <span data-t="embudo_pie"></span></figcaption>
+      </figure>
+    </div>
+    <div class="mes-tristaina">
+      <p id="mes-p2"></p>
+      <figure class="figura">
+        <div class="barras" id="barras-mes" role="img"></div>
+        <figcaption><b class="versal" data-t="fig5"></b> <span id="barras-pie"></span></figcaption>
+      </figure>
+    </div>
+  </div>
+  <div class="limites">
+    <h3 data-t="limites_titulo"></h3>
+    <dl>
+      <div><dt data-t="limite1_t"></dt><dd data-t="limite1"></dd></div>
+      <div><dt data-t="limite2_t"></dt><dd data-t="limite2"></dd></div>
+      <div><dt data-t="limite3_t"></dt><dd data-t="limite3"></dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- V. La guía: tres páginas de muestra, con datos y fotos reales de la ruta de ejemplo. -->
+<section class="seccion guia" id="guia">
+  <div class="guia-rejilla">
+    <div class="guia-texto">
+      <header class="seccion-cabeza">
+        <p class="ordinal versal" data-t="guia_ordinal"></p>
+        <h2 data-t="guia_titulo"></h2>
+      </header>
+      <p data-t="guia_p1"></p>
+      <ul class="guia-lista">
+        <li data-t="guia_l1"></li>
+        <li data-t="guia_l2"></li>
+        <li data-t="guia_l3"></li>
+        <li data-t="guia_l4"></li>
+        <li data-t="guia_l5"></li>
+      </ul>
+      <p data-t-html="guia_p2"></p>
+      <p class="acciones"><a class="boton boton-principal" href="ruta.html?ruta=tristaina&amp;mes=7" data-t="guia_cta"></a></p>
+      <p class="nota" data-t="guia_aviso"></p>
+    </div>
+    <figure class="figura guia-paginas" aria-hidden="true">
+      <div class="pagina pagina-portada" id="pagina-portada"></div>
+      <div class="pagina pagina-cuadro" id="pagina-cuadro"></div>
+      <div class="pagina pagina-especies" id="pagina-especies"></div>
+    </figure>
+  </div>
+</section>
+
+<!-- VI. Método y fuentes.
+  Límites de la API: https://www.inaturalist.org/pages/api+recommended+practices (leído el 2026-11-05).
+  Mapterhorn: https://mapterhorn.com/attribution
+-->
+<section class="seccion metodo" id="metodo">
+  <header class="seccion-cabeza">
+    <p class="ordinal versal" data-t="metodo_ordinal"></p>
+    <h2 data-t="metodo_titulo"></h2>
+  </header>
+  <dl class="metodo-lista">
+    <div><dt data-t="met1_t"></dt><dd id="met1"></dd></div>
+    <div><dt data-t="met2_t"></dt><dd data-t="met2"></dd></div>
+    <div><dt data-t="met3_t"></dt><dd data-t="met3"></dd></div>
+    <div><dt data-t="met4_t"></dt><dd data-t-html="met4"></dd></div>
+    <div><dt data-t="met5_t"></dt><dd data-t-html="met5"></dd></div>
+    <div><dt data-t="met6_t"></dt><dd data-t="met6"></dd></div>
+  </dl>
+  <div class="creditos">
+    <h3 data-t="creditos_titulo"></h3>
+    <p data-t-html="creditos_1"></p>
+    <p data-t-html="creditos_2"></p>
+    <p data-t-html="creditos_3"></p>
+  </div>
+</section>
+
+
+</main>
+
+<footer class="pie">
+  <a class="marca" href="#arriba" aria-label="WikiNatu">Wiki<span>Natu</span></a>
+  <p id="pie-datos"></p>
+  <p><a href="ruta.html" data-t="nav_visor"></a> · <a href="https://github.com/miguelferre/wikinatu" data-t="pie_codigo"></a></p>
+</footer>
+
+<input type="file" id="gpx-fichero" accept=".gpx,application/gpx+xml,application/xml,text/xml" hidden>
+
+<div class="soltar" id="soltar" hidden>
+  <div class="soltar-marco">
+    <p class="soltar-titulo" data-t="soltar_titulo">Suelta el GPX</p>
+    <p data-t="soltar_nota">Tu ruta no sale de este navegador.</p>
+  </div>
+</div>
+
+<noscript><p class="sin-js">WikiNatu necesita JavaScript para dibujar el relieve.</p></noscript>
+</body>
+</html>

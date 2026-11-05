@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WikiNatu: visor de rutas</title>
+<meta name="description" content="Lámina, cuadro, inventario y guía de una ruta GPX con las observaciones de iNaturalist. El GPX no sale del navegador.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230b1d24'/%3E%3Cpath d='M3 25 12 10l5 7 4-5 8 13z' fill='none' stroke='%23ecd38a' stroke-width='2'/%3E%3Ccircle cx='12' cy='10' r='3' fill='%23ff7a59'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/alegreya-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/alegreya-wght-italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/visor.css">
+<link rel="stylesheet" href="css/print.css" media="print">
+<script type="module" src="js/visor.js"></script>
+</head>
+<body>
+<a class="skip" href="#plancha" data-t="saltar">Saltar a la lámina</a>
+
+<header class="cabecera">
+  <a class="marca" href="index.html">Wiki<span>Natu</span></a>
+  <nav class="barra-rutas" data-t-aria="rutas_aria" aria-label="Tus rutas">
+    <ul id="listaRutas"></ul>
+  </nav>
+  <div class="cabecera-acciones">
+    <button id="btnGpx" class="boton" type="button" data-t="anadir_gpx">Añadir GPX</button>
+    <input id="fichero" type="file" accept=".gpx,application/gpx+xml" multiple hidden>
+    <button id="btnGuia" class="boton boton-oro" type="button" data-t="descargar_guia" disabled>Descargar guía</button>
+    <div class="idioma" role="group" data-t-aria="idioma_aria" aria-label="Idioma">
+      <button type="button" data-lang="es">ES</button><button type="button" data-lang="en">EN</button>
+    </div>
+  </div>
+</header>
+
+<main id="principal">
+  <h1 id="titulo" class="solo-lector">WikiNatu</h1>
+
+  <section class="filtros" id="filtros" data-t-aria="filtros_aria" aria-label="Filtros" hidden>
+    <div class="tira-grupo">
+      <div class="tira" id="tiraMeses" role="group" data-t-aria="meses_aria" aria-label="Mes central"></div>
+      <button id="btnAnio" class="boton boton-fino" type="button" aria-pressed="false" data-t="todo_anio">Todo el año</button>
+    </div>
+    <label class="interruptor">
+      <input id="chkSinConfirmar" type="checkbox" role="switch">
+      <span class="pista" aria-hidden="true"></span>
+      <span data-t="sin_confirmar">Incluir sin confirmar</span>
+    </label>
+    <label class="selector">
+      <span data-t="nombre_local">Nombre local</span>
+      <select id="selLocal">
+        <option value="auto" data-t="local_auto">Automático</option>
+        <option value="ninguno" data-t="local_ninguno">Ninguno</option>
+        <option value="zh-TW">zh-TW</option>
+        <option value="ja">ja</option>
+        <option value="fr">fr</option>
+        <option value="de">de</option>
+        <option value="pt">pt</option>
+      </select>
+    </label>
+    <p class="estado" id="estado" role="status" aria-live="polite"></p>
+    <div class="progreso" id="progreso" aria-hidden="true"><span></span></div>
+  </section>
+
+  <div class="aviso" id="aviso" role="alert" hidden></div>
+
+  <section class="vacio" id="vacio" hidden>
+    <div class="vacio-plancha">
+      <p class="versal" data-t="vacio_sup">Sin ruta</p>
+      <h2 data-t="vacio_titulo">Suelta un GPX en cualquier parte de esta página</h2>
+      <p class="texto" data-t="vacio_texto">El fichero se lee aquí, en tu navegador. A iNaturalist solo salen cajas de coordenadas.</p>
+      <div class="vacio-acciones">
+        <button id="btnGpx2" class="boton boton-oro" type="button" data-t="elegir_gpx">Elegir un GPX</button>
+        <a class="boton" href="ruta.html?ruta=tristaina" data-t="ver_ejemplo">Ver el ejemplo de Tristaina</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="plancha" id="plancha" tabindex="-1" hidden>
+    <div class="plancha-lienzo" id="lienzo"></div>
+    <aside class="cartela" id="cartela" data-t-aria="cartela_aria" aria-label="Cartela de la lámina"></aside>
+  </section>
+
+  <section class="seccion" id="seccionCuadro" hidden>
+    <header class="seccion-cabeza">
+      <h2 data-t="cuadro_titulo">Cuadro de la naturaleza</h2>
+      <p class="texto" id="cuadroNota"></p>
+    </header>
+    <div id="cuadro" class="cuadro-caja"></div>
+  </section>
+
+  <section class="seccion" id="seccionInventario" hidden>
+    <header class="seccion-cabeza">
+      <h2 data-t="inventario_titulo">Inventario</h2>
+      <p class="texto" id="inventarioNota"></p>
+    </header>
+    <div class="inventario-controles">
+      <div class="grupos" id="filtroGrupos" role="group" data-t-aria="grupos_aria" aria-label="Grupos"></div>
+      <label class="buscador">
+        <span class="solo-lector" data-t="buscar">Buscar especie</span>
+        <input id="buscar" type="search" data-t-ph="buscar" placeholder="Buscar especie" autocomplete="off">
+      </label>
+    </div>
+    <p class="sesgo texto" data-t="sesgo"></p>
+    <ul class="especies" id="especies"></ul>
+    <p class="inventario-fin" id="inventarioFin"></p>
+    <button id="btnMas" class="boton" type="button" hidden></button>
+  </section>
+</main>
+
+<footer class="pie" id="pie">
+  <p class="texto" data-t-html="creditos"></p>
+  <p class="texto"><a href="index.html" data-t="volver">Volver a la portada</a></p>
+</footer>
+
+<dialog class="ficha" id="ficha" aria-labelledby="fichaNombre"></dialog>
+
+<div class="soltar" id="soltar" hidden><p data-t="soltar">Suelta el GPX para abrir la ruta</p></div>
+<div id="guia" class="guia"></div>
+</body>
+</html>
