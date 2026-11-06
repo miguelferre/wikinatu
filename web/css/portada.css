@@ -31,16 +31,11 @@ img { max-width: 100%; }
 
 /* Cartel: tres capas, sol, letra y crestas. Las medidas siguen el ancho de la columna.
    Si la ventana es alta, crece y las letras se separan de las crestas. */
-.cartel { position: relative; flex: none; height: clamp(47cqw, calc(100svh - var(--barra-h) - 400px), 64cqw); }
-.cartel-sol { position: absolute; right: 4cqw; bottom: 5cqw; width: 21cqw; height: 21cqw; border-radius: 50%; background: var(--ambar); animation: cartel-sube var(--dur-lenta) var(--ease-entrada); }
+.cartel { position: relative; flex: none; height: clamp(50cqw, calc(100svh - var(--barra-h) - 360px), 72cqw); }
+.cartel-sol { position: absolute; right: 3cqw; bottom: 9cqw; width: 25cqw; height: 25cqw; border-radius: 50%; background: var(--ambar); animation: cartel-sube var(--dur-lenta) var(--ease-entrada); }
 .cartel-logo { position: absolute; left: 10cqw; top: 2.4cqw; width: 78cqw; max-width: none; height: auto; animation: cartel-sube var(--dur-lenta) var(--ease-entrada); }
-/* Las crestas se funden con la plancha por abajo y por la derecha: no hay borde. */
-.cartel-crestas {
-  position: absolute; left: 0; bottom: -2cqw; width: 128cqw; max-width: none; height: auto;
-  -webkit-mask-image: linear-gradient(to top, transparent, #000 26%), linear-gradient(to left, transparent, #000 34%);
-  mask-image: linear-gradient(to top, transparent, #000 26%), linear-gradient(to left, transparent, #000 34%);
-  -webkit-mask-composite: source-in; mask-composite: intersect;
-}
+/* Las crestas acaban en un primer plano de la tinta del fondo: no hay borde ni transparencias. */
+.cartel-crestas { position: absolute; left: 0; bottom: 0; width: 104cqw; max-width: none; height: auto; }
 @keyframes cartel-sube { from { opacity: 0; transform: translateY(12px); } }
 
 /* Banda oscura: ocupa lo que deja el cartel. */
@@ -138,7 +133,7 @@ img { max-width: 100%; }
   .boton-tinta { margin-left: auto; }
   .portada { display: block; height: auto; min-height: 0; }
   .cartel { height: 52cqw; overflow: hidden; }
-  .cartel-crestas { width: 100%; bottom: 0; -webkit-mask-image: linear-gradient(to top, transparent, #000 14%); mask-image: linear-gradient(to top, transparent, #000 14%); }
+  .cartel-crestas { width: 100%; }
   .banda { padding: 22px var(--gut) 26px; }
   .heroe { min-height: 680px; padding-inline: var(--gut); }
   .heroe-capa { -webkit-mask-image: linear-gradient(to bottom, transparent, #000 70px); mask-image: linear-gradient(to bottom, transparent, #000 70px); }
