@@ -32,10 +32,13 @@ img { max-width: 100%; }
 /* Cartel: tres capas, sol, letra y crestas. Las medidas siguen el ancho de la columna.
    Si la ventana es alta, crece y las letras se separan de las crestas. */
 .cartel { position: relative; flex: none; height: clamp(50cqw, calc(100svh - var(--barra-h) - 360px), 72cqw); }
-.cartel-sol { position: absolute; right: 3cqw; bottom: 9cqw; width: 25cqw; height: 25cqw; border-radius: 50%; background: var(--ambar); animation: cartel-sube var(--dur-lenta) var(--ease-entrada); }
+.cartel-sol { position: absolute; left: 5cqw; bottom: 17cqw; width: 14cqw; height: 14cqw; border-radius: 50%; background: var(--ambar); animation: cartel-sube var(--dur-lenta) var(--ease-entrada); }
 .cartel-logo { position: absolute; left: 10cqw; top: 2.4cqw; width: 78cqw; max-width: none; height: auto; animation: cartel-sube var(--dur-lenta) var(--ease-entrada); }
-/* Las crestas acaban en un primer plano de la tinta del fondo: no hay borde ni transparencias. */
-.cartel-crestas { position: absolute; left: 0; bottom: 0; width: 104cqw; max-width: none; height: auto; }
+/* Abajo acaban en un primer plano de la tinta del fondo. A la derecha se funden con el mapa. */
+.cartel-crestas {
+  position: absolute; left: 0; bottom: 0; width: 114cqw; max-width: none; height: auto;
+  -webkit-mask-image: linear-gradient(to left, transparent, #000 30%); mask-image: linear-gradient(to left, transparent, #000 30%);
+}
 @keyframes cartel-sube { from { opacity: 0; transform: translateY(12px); } }
 
 /* Banda oscura: ocupa lo que deja el cartel. */
@@ -120,6 +123,10 @@ img { max-width: 100%; }
 .soltar-nota { margin-top: 6px !important; font-size: 1.1rem; font-weight: 600; }
 .sin-js { padding: 24px; text-align: center; }
 
+/* Ventana baja: las letras tapan el hueco del sol. Mejor sin sol que con un sol cortado. */
+@media (min-width: 900px) and (max-height: 850px) { .cartel-sol { left: 2cqw; bottom: 18cqw; width: 10cqw; height: 10cqw; } }
+@media (min-width: 900px) and (max-height: 770px) { .cartel-sol { display: none; } }
+
 /* Ventana baja: tarjetas más bajas, para dejar sitio al mapa. */
 @media (min-width: 900px) and (max-height: 760px) {
   .heroe-tarjetas { height: 92px; }
@@ -133,7 +140,7 @@ img { max-width: 100%; }
   .boton-tinta { margin-left: auto; }
   .portada { display: block; height: auto; min-height: 0; }
   .cartel { height: 52cqw; overflow: hidden; }
-  .cartel-crestas { width: 100%; }
+  .cartel-crestas { width: 100%; -webkit-mask-image: none; mask-image: none; }
   .banda { padding: 22px var(--gut) 26px; }
   .heroe { min-height: 680px; padding-inline: var(--gut); }
   .heroe-capa { -webkit-mask-image: linear-gradient(to bottom, transparent, #000 70px); mask-image: linear-gradient(to bottom, transparent, #000 70px); }
@@ -147,8 +154,8 @@ img { max-width: 100%; }
 @media (max-width: 620px) {
   .cartel { height: 88vw; }
   .cartel-logo { top: 4vw; left: 7vw; width: 86vw; }
-  .cartel-sol { top: 34vw; bottom: auto; right: -4vw; width: 40vw; height: 40vw; }
-  .cartel-crestas { left: -48%; width: 190%; }
+  .cartel-sol { top: 45vw; bottom: auto; left: 5vw; width: 20vw; height: 20vw; }
+  .cartel-crestas { left: -2%; width: 150%; }
   .datos { grid-template-columns: 1fr 1fr; }
   .datos div:nth-child(3) { border-left: 0; }
   .datos div:nth-child(n+3) { border-top: 3px solid var(--tinta); }
