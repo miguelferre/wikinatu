@@ -1,8 +1,10 @@
 // Cuadro: perfil de la ruta con especies rotuladas al estilo de un panorama alpino.
 //
-// dibujarCuadro(contenedor, { perfil, etiquetas, leyenda }, opciones)
+// dibujarCuadro(contenedor, { perfil, etiquetas, leyenda, paisaje? }, opciones)
 // perfil: [{ km, alt }]. etiquetas: [{ km, alt, nombre, cientifico, color, taxon }], de más a menos vistas.
 // leyenda: [{ color, etiqueta, n? }]. Sin leyenda, se deduce de los colores presentes.
+// paisaje: { tramos: [{ km0, km1, clase }], leyenda: [{ clase, texto }], titulo }. Franja estrecha bajo el
+// perfil con las clases de AlphaEarth. Sin paisaje, el cuadro es el de siempre.
 // opciones: ancho, altoMontana, marcas [{ km, color }], titulo, alPulsar, alResaltar. Sin fondo: va sobre papel.
 // Devuelve { resaltar(taxon|null), comoSvg(), destruir() }.
 // Si no caben todas las etiquetas, quedan las primeras: ~24 a 1440 px y ~10 a 375 px.
@@ -95,7 +97,11 @@ function pintar(contenedor, datos, o, W) {
   const desvio = lista.length ? Math.max(...lista.map((e, i) => Math.abs(g.x0 + (i + 0.5) * ((g.x1 - g.x0) / lista.length) - (g.x0 + (e.km / (datos.perfil.at(-1).km || 1)) * (g.x1 - g.x0))))) : 0;
   const yCima = yBase0 + Math.min(estrecho ? 46 : 86, Math.max(estrecho ? 26 : 38, desvio * 0.16)); // cota más alta
   const yPie = yCima + montana;
-  const yEje = yPie + (estrecho ? 24 : 28);
+  // Franja de paisaje: va pegada al pie y empuja hacia abajo las marcas de km.
+  const conPaisaje = !!datos.paisaje?.tramos?.length;
+  const franja = conPaisaje ? { y: yPie + 3, alto: estrecho ? 7 : 9 } : null;
+  const bajaEje = franja ? franja.alto + 5 : 0;
+  const yEje = yPie + bajaEje + (estrecho ? 24 : 28);
 
   // Leyenda en filas, con el ancho real de cada entrada.
   const fl = `600 ${estrecho ? 13 : 14.5}px Barlow, sans-serif`;
@@ -108,9 +114,22 @@ function pintar(contenedor, datos, o, W) {
     filas[filas.length - 1].push({ ...l, texto, x: cx });
     cx += w;
   }
+  // Leyenda del paisaje: filas propias debajo, con un título corto delante.
+  const filasPaisaje = [];
+  if (conPaisaje) {
+    let fila = [{ titulo: true, texto: datos.paisaje.titulo || '', x: x0 }];
+    cx = x0 + medir(datos.paisaje.titulo || '', fl) + (estrecho ? 10 : 14);
+    for (const l of datos.paisaje.leyenda) {
+      const w = 16 + medir(l.texto, fl) + (estrecho ? 14 : 22);
+      if (cx + w > x1 && fila.length) { filasPaisaje.push(fila); fila = []; cx = x0; }
+      fila.push({ ...l, x: cx });
+      cx += w;
+    }
+    filasPaisaje.push(fila);
+  }
   const altoFila = estrecho ? 20 : 22;
   const yLeyenda = yEje + (estrecho ? 18 : 22);
-  const H = Math.round(yLeyenda + filas.length * altoFila + F + 4);
+  const H = Math.round(yLeyenda + (filas.length + filasPaisaje.length) * altoFila + F + 4);
 
   const alts = perfil.map((p) => p.alt).filter((a) => a != null);
   const aMin = Math.min(...alts), aMax = Math.max(...alts);
@@ -131,13 +150,13 @@ function pintar(contenedor, datos, o, W) {
 
   const parteA = {
     W, H, g, t, id, bandas, curvas, cresta, lista, dosLineas, yAlto, yBase0, yCima, yPie, yEje, yLeyenda, altoFila, filas, fl, F, x0, x1, X, Y,
-    aMin, aMax, suelo, techo, kmMax, estrecho,
+    aMin, aMax, suelo, techo, kmMax, estrecho, franja, bajaEje, filasPaisaje, paisaje: datos.paisaje,
   };
   return dibujarSvg(contenedor, parteA, o);
 }
 
 function ejes(p) {
-  const { x0, x1, X, Y, yCima, yPie, yEje, aMin, techo, suelo, kmMax, t, estrecho, F, W } = p;
+  const { x0, x1, X, Y, yCima, yPie, yEje, aMin, techo, suelo, kmMax, t, estrecho, F, W, bajaEje = 0 } = p;
   const paso = pasoAltura(techo - suelo, estrecho ? 4 : 6);
   const pasoK = pasoKm(kmMax);
   const fuente = `font-family="${LETRA}" font-weight="500" font-size="${estrecho ? 11.5 : 13.5}" fill="${t.suave}"`;
@@ -157,7 +176,7 @@ function ejes(p) {
   for (let k = 0; k <= kmMax + 1e-6; k += menor) {
     const mayor = Math.abs(k / pasoK - Math.round(k / pasoK)) < 1e-6;
     const x = X(k);
-    lineas += `M${n1(x)} ${yPie}v${mayor ? 7 : 3.5}`;
+    lineas += `M${n1(x)} ${yPie + bajaEje}v${mayor ? 7 : 3.5}`;
     if (mayor) s += `<text x="${n1(x)}" y="${yEje - (estrecho ? 4 : 5)}" text-anchor="middle" ${fuente}>${(Math.round(k * 10) / 10).toLocaleString(document.documentElement.lang || 'es')}</text>`;
   }
   s += `<text x="${x1 + (estrecho ? 8 : 9)}" y="${yEje - (estrecho ? 4 : 5)}" text-anchor="${estrecho ? 'end' : 'start'}" ${fuente}>km</text>`;
@@ -191,6 +210,27 @@ function rotulos(p) {
   }).join('');
 }
 
+// Franja de tintas planas bajo el perfil y su leyenda.
+function franjaSvg(p) {
+  const { franja, paisaje, X, t } = p;
+  if (!franja) return '';
+  const c = (clase) => t.paisaje[clase % t.paisaje.length];
+  return paisaje.tramos.map((tr) => `<rect x="${n1(X(tr.km0))}" y="${franja.y}" width="${n1(Math.max(0.5, X(tr.km1) - X(tr.km0)))}" height="${franja.alto}" fill="${c(tr.clase)}"/>`).join('');
+}
+
+function leyendaPaisaje(p) {
+  const { filasPaisaje, filas, yLeyenda, altoFila, t, estrecho } = p;
+  if (!filasPaisaje?.length) return '';
+  const c = (clase) => t.paisaje[clase % t.paisaje.length];
+  const tam = estrecho ? 13 : 14.5;
+  return filasPaisaje.flatMap((fila, i) => fila.map((l) => {
+    const y = yLeyenda + (filas.length + i) * altoFila;
+    if (l.titulo) return `<text x="${n1(l.x)}" y="${y}" font-family="${LETRA}" font-weight="500" font-size="${tam}" fill="${t.suave}">${esc(l.texto)}</text>`;
+    return `<rect x="${n1(l.x)}" y="${y - 9}" width="11" height="8" fill="${c(l.clase)}"/>
+<text x="${n1(l.x + 16)}" y="${y}" font-family="${LETRA_NOMBRE}" font-weight="600" font-size="${tam}" fill="${t.tinta}">${esc(l.texto)}</text>`;
+  })).join('');
+}
+
 function dibujarSvg(contenedor, p, o) {
   const { W, H, t, id, bandas, curvas, cresta, yPie, filas, yLeyenda, altoFila, X, estrecho } = p;
   const rug = (o.marcas || []).map((m) => `<rect x="${n1(X(m.km) - 0.5)}" y="${yPie - 9}" width="1" height="7" fill="${colorGrupo(m.color)}"/>`).join('');
@@ -205,8 +245,10 @@ ${ejes(p)}
 ${bandas}
 <g clip-path="url(#${id}c)">${curvas}${rug}</g>
 <path d="${trazo(cresta)}" stroke="${t.tinta}" stroke-width="3.2" fill="none" stroke-linejoin="round"/>
+${franjaSvg(p)}
 ${rotulos(p)}
 ${leyenda}
+${leyendaPaisaje(p)}
 </svg>`;
   contenedor.innerHTML = svg;
   return contenedor.querySelector('svg');

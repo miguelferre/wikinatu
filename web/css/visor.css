@@ -86,6 +86,7 @@ main { flex: 1; }
 .seccion-cabeza h2 { font-size: clamp(2.8rem, 1.2rem + 7vw, 7.4rem); line-height: .98; }
 .seccion-cabeza .texto { max-width: 64ch; margin-top: 8px; }
 .cuadro-caja { min-height: 120px; }
+.cuadro-credito { max-width: 72ch; margin-top: 10px; color: var(--muted); font-size: .85rem; line-height: 1.35; }
 
 .pie { margin-top: clamp(36px, 6vw, 64px); padding: 18px var(--gut) 26px; color: var(--muted); font-size: .95rem; }
 .pie p + p { margin-top: 6px; }

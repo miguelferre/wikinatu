@@ -78,6 +78,8 @@
   --cua-anillo: var(--crema);
   --cua-curva: var(--crema);
   --cua-bandas: #f6ad1f, #f19a22, #e4542a, #0d6f74, #14262b;
+  /* Franja de paisaje (AlphaEarth): tintas de la misma paleta, por orden de aparición en la ruta. */
+  --cua-paisaje: #0d6f74, #f6ad1f, #d9431c, #14262b, #8f8467, #c4cfc7;
 
   /* Héroe. hilo y base son r,g,b: el lienzo les pone su transparencia. */
   --heroe-fondo: #0f1f24, #11242a, #14282f, #162c33, #193138;
