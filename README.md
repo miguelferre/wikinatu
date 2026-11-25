@@ -26,7 +26,7 @@ npm test
 
 - Observaciones y fotos: [iNaturalist](https://www.inaturalist.org) y sus observadores. Solo se enseñan fotos con licencia abierta, con autor y licencia.
 - Relieve: [Mapterhorn](https://mapterhorn.com/attribution).
-- Paisaje (en pruebas, sin uso en la web aún): [AlphaEarth Foundations](https://developers.google.com/earth-engine/guides/aef_on_gcs_readme), embeddings anuales, CC-BY 4.0. The AlphaEarth Foundations Satellite Embedding dataset is produced by Google and Google DeepMind. Descompresión ZSTD con [fzstd](https://github.com/101arrowz/fzstd) 0.1.1, licencia MIT, en `web/js/vendor/fzstd.js`.
+- Paisaje: franja bajo el perfil del cuadro, con [AlphaEarth Foundations](https://developers.google.com/earth-engine/guides/aef_on_gcs_readme), embeddings anuales de 2025, CC-BY 4.0. Índice por zona en `web/data/aef/`, generado con `node scripts/aef-indice.mjs 2025`. The AlphaEarth Foundations Satellite Embedding dataset is produced by Google and Google DeepMind. Descompresión ZSTD con [fzstd](https://github.com/101arrowz/fzstd) 0.1.1, licencia MIT, en `web/js/vendor/fzstd.js`.
 - Tipografía: [Anton](https://github.com/googlefonts/AntonFont) y [Barlow](https://github.com/jpt/barlow), con licencia OFL. Ver `web/fonts/OFL.txt`.
 - Ruta de ejemplo: Lagos de Tristaina, de Miguel Ferreiro.
 - Código: licencia MIT. Ver `LICENSE`.
