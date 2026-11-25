@@ -3,7 +3,7 @@
 // dibujarCuadro(contenedor, { perfil, etiquetas, leyenda, paisaje? }, opciones)
 // perfil: [{ km, alt }]. etiquetas: [{ km, alt, nombre, cientifico, color, taxon }], de más a menos vistas.
 // leyenda: [{ color, etiqueta, n? }]. Sin leyenda, se deduce de los colores presentes.
-// paisaje: { tramos: [{ km0, km1, clase }], leyenda: [{ clase, texto }], titulo }. Franja estrecha bajo el
+// paisaje: { tramos: [{ km0, km1, clase }], leyenda: [{ clases: [n], texto }], titulo }. Franja estrecha bajo el
 // perfil con las clases de AlphaEarth. Sin paisaje, el cuadro es el de siempre.
 // opciones: ancho, altoMontana, marcas [{ km, color }], titulo, alPulsar, alResaltar. Sin fondo: va sobre papel.
 // Devuelve { resaltar(taxon|null), comoSvg(), destruir() }.
@@ -120,7 +120,7 @@ function pintar(contenedor, datos, o, W) {
     let fila = [{ titulo: true, texto: datos.paisaje.titulo || '', x: x0 }];
     cx = x0 + medir(datos.paisaje.titulo || '', fl) + (estrecho ? 10 : 14);
     for (const l of datos.paisaje.leyenda) {
-      const w = 16 + medir(l.texto, fl) + (estrecho ? 14 : 22);
+      const w = 4 + 12 * l.clases.length + medir(l.texto, fl) + (estrecho ? 14 : 22);
       if (cx + w > x1 && fila.length) { filasPaisaje.push(fila); fila = []; cx = x0; }
       fila.push({ ...l, x: cx });
       cx += w;
@@ -226,8 +226,9 @@ function leyendaPaisaje(p) {
   return filasPaisaje.flatMap((fila, i) => fila.map((l) => {
     const y = yLeyenda + (filas.length + i) * altoFila;
     if (l.titulo) return `<text x="${n1(l.x)}" y="${y}" font-family="${LETRA}" font-weight="500" font-size="${tam}" fill="${t.suave}">${esc(l.texto)}</text>`;
-    return `<rect x="${n1(l.x)}" y="${y - 9}" width="11" height="8" fill="${c(l.clase)}"/>
-<text x="${n1(l.x + 16)}" y="${y}" font-family="${LETRA_NOMBRE}" font-weight="600" font-size="${tam}" fill="${t.tinta}">${esc(l.texto)}</text>`;
+    const muestras = l.clases.map((k, j) => `<rect x="${n1(l.x + j * 12)}" y="${y - 9}" width="10" height="8" fill="${c(k)}"/>`).join('');
+    return `${muestras}
+<text x="${n1(l.x + 4 + 12 * l.clases.length)}" y="${y}" font-family="${LETRA_NOMBRE}" font-weight="600" font-size="${tam}" fill="${t.tinta}">${esc(l.texto)}</text>`;
   })).join('');
 }
 

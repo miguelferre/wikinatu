@@ -113,6 +113,16 @@ function pintarCuadroActual() {
   });
 }
 
+// Dos clases con la misma planta comparten entrada: varias muestras de color y un solo nombre.
+function unirLeyenda(entradas) {
+  const porTexto = new Map();
+  for (const e of entradas) {
+    if (!porTexto.has(e.texto)) porTexto.set(e.texto, { texto: e.texto, clases: [] });
+    porTexto.get(e.texto).clases.push(e.clase);
+  }
+  return [...porTexto.values()];
+}
+
 // La franja sale cuando los puntos ya están: sin ellos, las clases no tendrían nombre todavía.
 function datosPaisaje() {
   if (!S.paisaje || !S.obsListas) return null;
@@ -121,7 +131,7 @@ function datosPaisaje() {
   if (!franja?.tramos.length) return null;
   return {
     titulo: t('paisaje_titulo'), tramos: franja.tramos,
-    leyenda: franja.leyenda.map((l) => ({ clase: l.clase, texto: l.nombre || t('paisaje_sin_planta') })),
+    leyenda: unirLeyenda(franja.leyenda.map((l) => ({ clase: l.clase, texto: l.nombre || t('paisaje_sin_planta') }))),
   };
 }
 
