@@ -178,8 +178,9 @@ export function cuentasPorClase(clases, perfil, observaciones, n) {
 }
 
 // Nombre de cada clase. Una clase sin plantas se queda sin nombre.
-// 'caracteristica': la planta con mayor parte de sus observaciones en esa clase, entre las que
-//   tienen al menos `minimo` allí. A igualdad, la más observada. Si ninguna llega, la más observada.
+// 'caracteristica': entre las plantas con al menos `minimo` observaciones en la clase, la de mayor
+//   n x cuota, donde n son sus observaciones en la clase y cuota la parte de todas las suyas que cae
+//   en ella. Premia a la planta abundante en la clase y propia de ella. Si ninguna llega, la más vista.
 // 'mas_vista': la planta con más observaciones en la clase.
 export function nombrarClases(clases, perfil, observaciones, n, { criterio = 'caracteristica', minimo = 3 } = {}) {
   const { porClase, total } = cuentasPorClase(clases, perfil, observaciones, n);
@@ -191,12 +192,12 @@ export function nombrarClases(clases, perfil, observaciones, n, { criterio = 'ca
     return b.taxon < a.taxon ? b : a;
   }, null);
   return porClase.map((m) => {
-    const lista = [...m].map(([taxon, v]) => ({ taxon, n: v, cuota: v / total.get(taxon) }));
+    const lista = [...m].map(([taxon, v]) => ({ taxon, n: v, cuota: v / total.get(taxon), peso: (v * v) / total.get(taxon) }));
     if (!lista.length) return null;
     const masVista = mejor(lista, (x) => x.n);
     if (criterio === 'mas_vista') return masVista;
     const candidatas = lista.filter((x) => x.n >= minimo);
-    return candidatas.length ? mejor(candidatas, (x) => x.cuota) : masVista;
+    return candidatas.length ? mejor(candidatas, (x) => x.peso) : masVista;
   });
 }
 

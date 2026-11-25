@@ -130,3 +130,11 @@ test('la planta más característica: la que concentra sus observaciones en la c
   const pocas = nombrarClases(clases, perfil, [en(0, 7), en(1, 7), en(2, 8)], 2);
   assert.equal(pocas[0].taxon, 7);
 });
+
+test('la más característica no premia a una planta rara solo por estar concentrada', () => {
+  const clases = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1];
+  const en = (i, taxon, veces) => Array.from({ length: veces }, () => ({ lat: 42.6, lon: 1.4 + i * 0.001, taxon, color: 'plantas' }));
+  // A: 16 en la clase 0 y 15 en la 1 (peso 16·16/31 = 8,3). B: 7 de 8 en la clase 0 (peso 6,1).
+  const obs = [...en(0, 'A', 16), ...en(6, 'A', 15), ...en(1, 'B', 7), ...en(7, 'B', 1)];
+  assert.equal(nombrarClases(clases, perfil, obs, 2)[0].taxon, 'A');
+});
