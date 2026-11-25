@@ -162,21 +162,41 @@ export function muestraCercana(perfil, lat, lon) {
   return mejor;
 }
 
-// Nombre de cada clase: la planta con más observaciones cuya muestra más cercana cae en ella.
-// observaciones: [{ lat, lon, taxon, color }]. Una clase sin plantas se queda sin nombre.
-export function nombrarClases(clases, perfil, observaciones, n) {
-  const cuentas = Array.from({ length: n }, () => new Map());
+// Observaciones de plantas por clase: la muestra del perfil más cercana decide la clase.
+export function cuentasPorClase(clases, perfil, observaciones, n) {
+  const porClase = Array.from({ length: n }, () => new Map());
+  const total = new Map();
   for (const o of observaciones) {
     if (o.color !== 'plantas') continue;
     const i = muestraCercana(perfil, o.lat, o.lon);
     const c = clases[i];
     if (i < 0 || c == null) continue;
-    cuentas[c].set(o.taxon, (cuentas[c].get(o.taxon) || 0) + 1);
+    porClase[c].set(o.taxon, (porClase[c].get(o.taxon) || 0) + 1);
+    total.set(o.taxon, (total.get(o.taxon) || 0) + 1);
   }
-  return cuentas.map((m) => {
-    let taxon = null, max = 0;
-    for (const [t, v] of m) if (v > max || (v === max && taxon != null && t < taxon)) { taxon = t; max = v; }
-    return taxon == null ? null : { taxon, n: max };
+  return { porClase, total };
+}
+
+// Nombre de cada clase. Una clase sin plantas se queda sin nombre.
+// 'caracteristica': la planta con mayor parte de sus observaciones en esa clase, entre las que
+//   tienen al menos `minimo` allí. A igualdad, la más observada. Si ninguna llega, la más observada.
+// 'mas_vista': la planta con más observaciones en la clase.
+export function nombrarClases(clases, perfil, observaciones, n, { criterio = 'caracteristica', minimo = 3 } = {}) {
+  const { porClase, total } = cuentasPorClase(clases, perfil, observaciones, n);
+  const mejor = (lista, clave) => lista.reduce((a, b) => {
+    if (!a) return b;
+    const d = clave(b) - clave(a);
+    if (Math.abs(d) > 1e-12) return d > 0 ? b : a;
+    if (b.n !== a.n) return b.n > a.n ? b : a;
+    return b.taxon < a.taxon ? b : a;
+  }, null);
+  return porClase.map((m) => {
+    const lista = [...m].map(([taxon, v]) => ({ taxon, n: v, cuota: v / total.get(taxon) }));
+    if (!lista.length) return null;
+    const masVista = mejor(lista, (x) => x.n);
+    if (criterio === 'mas_vista') return masVista;
+    const candidatas = lista.filter((x) => x.n >= minimo);
+    return candidatas.length ? mejor(candidatas, (x) => x.cuota) : masVista;
   });
 }
 
@@ -196,10 +216,10 @@ export function clasesDelPerfil(vectores, opciones = {}) {
 }
 
 // Franja lista para el cuadro: tramos en km y una entrada de leyenda por clase.
-export function franjaPaisaje(perfil, agrupacion, observaciones, filaDe) {
+export function franjaPaisaje(perfil, agrupacion, observaciones, filaDe, opciones = {}) {
   if (!agrupacion) return null;
   const { clases, n } = agrupacion;
-  const nombres = nombrarClases(clases, perfil, observaciones, n);
+  const nombres = nombrarClases(clases, perfil, observaciones, n, opciones);
   const km = (i) => perfil[Math.min(i, perfil.length - 1)].km;
   // Cada muestra cubre de la mitad con la anterior a la mitad con la siguiente.
   const borde = (i) => (i <= 0 ? km(0) : i >= perfil.length ? km(perfil.length - 1) : (km(i - 1) + km(i)) / 2);

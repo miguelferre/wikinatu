@@ -117,21 +117,32 @@ function pintarCuadroActual() {
 function unirLeyenda(entradas) {
   const porTexto = new Map();
   for (const e of entradas) {
-    if (!porTexto.has(e.texto)) porTexto.set(e.texto, { texto: e.texto, clases: [] });
+    if (!porTexto.has(e.texto)) porTexto.set(e.texto, { texto: e.texto, cursiva: e.cursiva, clases: [] });
     porTexto.get(e.texto).clases.push(e.clase);
   }
   return [...porTexto.values()];
 }
 
+// Leyenda del paisaje: nombre común en el idioma de la página si iNaturalist lo da. Si no, el
+// científico (en cursiva), nunca un nombre en otro idioma.
+function nombreComun(f) {
+  const n = f.nombre;
+  if (!n || n === f.cientifico) return null;
+  if (idiomaActual() !== 'en' && n === f.nombreEn) return null; // iNaturalist devolvió el inglés
+  return n;
+}
+
 // La franja sale cuando los puntos ya están: sin ellos, las clases no tendrían nombre todavía.
 function datosPaisaje() {
   if (!S.paisaje || !S.obsListas) return null;
-  const fila = (id) => { const f = S.porId.get(id); return f && { nombre: nombreDe(f), cientifico: f.cientifico }; };
+  const fila = (id) => { const f = S.porId.get(id); return f && { nombre: nombreComun(f), cientifico: f.cientifico }; };
   const franja = franjaPaisaje(S.perfil, S.paisaje, S.obs, fila);
   if (!franja?.tramos.length) return null;
   return {
     titulo: t('paisaje_titulo'), tramos: franja.tramos,
-    leyenda: unirLeyenda(franja.leyenda.map((l) => ({ clase: l.clase, texto: l.nombre || t('paisaje_sin_planta') }))),
+    leyenda: unirLeyenda(franja.leyenda.map((l) => ({
+      clase: l.clase, texto: l.nombre || l.cientifico || t('paisaje_sin_planta'), cursiva: !l.nombre && !!l.cientifico,
+    }))),
   };
 }
 

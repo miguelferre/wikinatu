@@ -85,13 +85,15 @@ test('cada clase toma el nombre de la planta más observada en ella', () => {
     { lat: 42.6, lon: 1.4023, taxon: 99, color: 'aves' },
     { lat: 42.6, lon: 1.4071, taxon: 12, color: 'plantas' }, // muestra 7: clase 1
   ];
-  assert.deepEqual(nombrarClases(clases, perfil, obs, 2), [{ taxon: 11, n: 2 }, { taxon: 12, n: 1 }]);
+  const r = nombrarClases(clases, perfil, obs, 2, { criterio: 'mas_vista' });
+  assert.deepEqual(r.map((x) => [x.taxon, x.n]), [[11, 2], [12, 1]]);
 });
 
 test('una clase sin plantas se queda sin nombre', () => {
   const clases = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1];
   const obs = [{ lat: 42.6, lon: 1.401, taxon: 10, color: 'plantas' }, { lat: 42.6, lon: 1.408, taxon: 5, color: 'insectos' }];
   const nombres = nombrarClases(clases, perfil, obs, 2);
+  assert.equal(nombres[0].taxon, 10);
   assert.equal(nombres[1], null);
   const franja = franjaPaisaje(perfil, { clases, n: 2 }, obs, (id) => ({ nombre: `Planta ${id}`, cientifico: `P. ${id}` }));
   assert.deepEqual(franja.leyenda.map((l) => l.nombre), ['Planta 10', null]);
@@ -107,4 +109,24 @@ test('clasesDelPerfil devuelve clases alineadas con el perfil, sin tramos cortos
   assert.ok([50, 51, 52, 53].every((i) => r.clases[i] === null));
   assert.ok(tramosDe(r.clases).filter((t) => t.clase != null).every((t) => t.fin - t.inicio >= 3));
   assert.deepEqual(clasesDelPerfil(conHueco), r);
+});
+
+test('la planta más característica: la que concentra sus observaciones en la clase', () => {
+  const clases = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1];
+  const en = (i, taxon) => ({ lat: 42.6, lon: 1.4 + i * 0.001, taxon, color: 'plantas' });
+  // El 1 es el más visto en las dos clases. El 2 vive solo en la clase 1, con 3 observaciones.
+  const obs = [
+    ...[0, 1, 2, 3, 4, 0].map((i) => en(i, 1)), // 6 en la clase 0
+    ...[5, 6, 7, 8].map((i) => en(i, 1)), // 4 en la clase 1
+    ...[5, 6, 7].map((i) => en(i, 2)), // 3 en la clase 1
+    en(1, 3), en(2, 3), // 2 en la clase 0: no llega al mínimo de 3
+  ];
+  const mas = nombrarClases(clases, perfil, obs, 2, { criterio: 'mas_vista' });
+  assert.deepEqual(mas.map((x) => x.taxon), [1, 1]);
+  const car = nombrarClases(clases, perfil, obs, 2);
+  assert.deepEqual(car.map((x) => x.taxon), [1, 2]);
+  assert.equal(car[1].cuota, 1);
+  // Sin ninguna planta con 3 observaciones, se vuelve a la más vista.
+  const pocas = nombrarClases(clases, perfil, [en(0, 7), en(1, 7), en(2, 8)], 2);
+  assert.equal(pocas[0].taxon, 7);
 });
