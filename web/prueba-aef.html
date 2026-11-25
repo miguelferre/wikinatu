@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>WikiNatu: prueba de AlphaEarth</title>
+<link rel="stylesheet" href="css/base.css">
+<style>
+  body { background: var(--papel); color: var(--tinta); font-family: Barlow, sans-serif; margin: 0; padding: 16px; }
+  main { max-width: 860px; margin: 0 auto; }
+  h1 { font-family: Anton, sans-serif; font-weight: 400; letter-spacing: .02em; }
+  table { border-collapse: collapse; margin: 12px 0; }
+  td, th { border-bottom: 1px solid var(--linea); padding: 4px 12px 4px 0; text-align: left; }
+  pre { white-space: pre-wrap; font-size: 13px; }
+  small { color: var(--suave); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Prueba de AlphaEarth</h1>
+  <p>Página técnica, sin enlace desde la web. Lee los 420 puntos del perfil de Tristaina y pide su vector de paisaje de 2025.</p>
+  <p><button id="ir" type="button">Empezar</button> <label><input id="sinCache" type="checkbox" checked> Borrar antes la caché de AlphaEarth</label></p>
+  <table id="tabla" hidden>
+    <tbody></tbody>
+  </table>
+  <pre id="salida"></pre>
+  <p><small>The AlphaEarth Foundations Satellite Embedding dataset is produced by Google and Google DeepMind. Licencia CC-BY 4.0.</small></p>
+</main>
+<script type="module">
+  import { leerGpx } from './js/geo.js';
+  import { perfilDe } from './js/analisis.js';
+  import { vectoresAef, nuevasCifras } from './js/aef.js';
+
+  const salida = document.getElementById('salida');
+  const tabla = document.getElementById('tabla');
+  const fila = (k, v) => { const tr = document.createElement('tr'); tr.innerHTML = '<th></th><td></td>'; tr.children[0].textContent = k; tr.children[1].textContent = v; tabla.tBodies[0].append(tr); };
+
+  function zstdNativo() {
+    try { new DecompressionStream('zstd'); return 'sí'; } catch { return 'no'; }
+  }
+
+  async function borrarCache() {
+    try {
+      const c = await caches.open('wikinatu-v1');
+      for (const r of await c.keys()) if (r.url.includes('alphaearth_foundations')) await c.delete(r);
+    } catch { /* sin caché */ }
+  }
+
+  document.getElementById('ir').addEventListener('click', async () => {
+    tabla.hidden = true; tabla.tBodies[0].replaceChildren(); salida.textContent = 'Leyendo…';
+    if (document.getElementById('sinCache').checked) await borrarCache();
+    const gpx = await (await fetch('data/tristaina.gpx')).text();
+    const perfil = perfilDe(leerGpx(gpx).puntos, () => null);
+    const cifras = nuevasCifras();
+    const t0 = performance.now();
+    const vectores = await vectoresAef(perfil, { anio: 2025, cifras });
+    const ms = performance.now() - t0;
+    const sin = vectores.filter((v) => !v).length;
+    const resultado = {
+      puntos: perfil.length, ficheros: cifras.ficheros, peticiones: cifras.peticiones,
+      kb: Math.round(cifras.bytes / 1024), ms: Math.round(ms), sinDato: sin / perfil.length,
+      desdeCache: cifras.desdeCache, errores: cifras.errores, zstdNativo: zstdNativo(),
+      unicos: new Set(vectores.filter(Boolean).map((v) => v.join())).size,
+    };
+    window.resultadoAef = { resultado, vectores };
+    fila('Puntos del perfil', resultado.puntos);
+    fila('Ficheros COG', resultado.ficheros);
+    fila('Peticiones', resultado.peticiones);
+    fila('Descargado', `${resultado.kb} KB`);
+    fila('Tiempo total', `${(ms / 1000).toFixed(1)} s`);
+    fila('Puntos sin dato', `${(resultado.sinDato * 100).toFixed(1)} %`);
+    fila('Vectores distintos', resultado.unicos);
+    fila('Lecturas desde la caché', resultado.desdeCache);
+    fila("DecompressionStream('zstd') nativo", resultado.zstdNativo);
+    tabla.hidden = false;
+    const v = vectores.find(Boolean);
+    salida.textContent = (resultado.errores.length ? `Errores:\n${resultado.errores.join('\n')}\n\n` : '')
+      + (v ? `Primer vector (8 de 64): ${Array.from(v.slice(0, 8), (x) => x.toFixed(4)).join(' ')}` : 'Ningún punto con dato.');
+  });
+</script>
+</body>
+</html>

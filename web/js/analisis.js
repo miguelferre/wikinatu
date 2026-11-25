@@ -80,7 +80,7 @@ function suavizarAltitud(puntos, radio = 3) {
   });
 }
 
-// Perfil de la ruta a paso regular. Manda la altitud del GPX: el modelo mide la montaña
+// Perfil de la ruta a paso regular, con la posición de cada muestra. Manda la altitud del GPX: el modelo mide la montaña
 // sobre un túnel o un puente. Sin ella, se usa el modelo. Los huecos toman el valor vecino.
 export function perfilDe(puntos, altura, muestras = 420) {
   const km = acumulado(puntos);
@@ -98,7 +98,7 @@ export function perfilDe(puntos, altura, muestras = 420) {
     const lat = puntos[i].lat + (puntos[i + 1].lat - puntos[i].lat) * f;
     const lon = puntos[i].lon + (puntos[i + 1].lon - puntos[i].lon) * f;
     const a = eles?.[i], b = eles?.[i + 1];
-    out.push({ km: d, alt: a != null && b != null ? a + (b - a) * f : altura(lat, lon) });
+    out.push({ km: d, alt: a != null && b != null ? a + (b - a) * f : altura(lat, lon), lat, lon });
   }
   let ultimo = out.find((p) => p.alt != null)?.alt ?? null;
   for (const p of out) { if (p.alt == null) p.alt = ultimo; else ultimo = p.alt; }
