@@ -7,6 +7,8 @@ import { crearProyector } from './geo.js';
 import { contarEspecies, filaDe, puntosDe } from './inat.js';
 import { crearLamina } from './lamina.js';
 import { dibujarCuadro } from './cuadro.js';
+import { vectoresAef } from './aef.js';
+import { clasesDelPerfil, franjaPaisaje } from './paisaje.js';
 import { centroDe, elegirEtiquetas, localeLocal, perfilDe, resumenPerfil, soloEspecies, textoVentana, ventanaMeses } from './analisis.js';
 import { iniciarEntrada, olvidar, pintarBarra, rutaInicial } from './visor-rutas.js';
 import { iniciarFiltros, pintarTira } from './visor-filtros.js';
@@ -37,6 +39,8 @@ export const S = {
   // Fases de la carga en curso: ver resumenCarga. obsListas: los puntos ya no van a cambiar.
   carga: { relieve: null, especies: null, puntos: null, nombres: null, parcial: null, mostrada: false, final: '' },
   obsListas: false, fallo: false, guiaOcupada: false,
+  // Clases de paisaje de AlphaEarth para el perfil actual. null: sin dato o aún no.
+  paisaje: null, paisajeDe: null,
 };
 
 export const formato = (n) => new Intl.NumberFormat(idiomaActual() === 'es' ? 'es-ES' : 'en-GB', { useGrouping: 'always' }).format(n);
@@ -101,10 +105,58 @@ function pintarCuadroActual() {
   const n = new Map();
   for (const f of S.filas) n.set(f.grupo.color, (n.get(f.grupo.color) || 0) + 1);
   const leyenda = COLORES.filter((c) => n.has(c)).map((c) => ({ color: c, etiqueta: t(`l_${c}`), n: formato(n.get(c)) }));
-  S.cuadro = dibujarCuadro(caja, { perfil: S.perfil, etiquetas, leyenda }, {
+  const paisaje = datosPaisaje();
+  $('cuadroCredito').hidden = !paisaje;
+  S.cuadro = dibujarCuadro(caja, { perfil: S.perfil, etiquetas, leyenda, paisaje }, {
     titulo: t('cuadro_titulo'), marcas: S.obs.map((o) => ({ km: S.proyectar(o.lat, o.lon).km, color: o.color })),
     alPulsar: abrirFicha, alResaltar: (x) => S.lamina?.resaltar(x),
   });
+}
+
+// Dos clases con la misma planta comparten entrada: varias muestras de color y un solo nombre.
+function unirLeyenda(entradas) {
+  const porTexto = new Map();
+  for (const e of entradas) {
+    if (!porTexto.has(e.texto)) porTexto.set(e.texto, { texto: e.texto, cursiva: e.cursiva, clases: [] });
+    porTexto.get(e.texto).clases.push(e.clase);
+  }
+  return [...porTexto.values()];
+}
+
+// Leyenda del paisaje: nombre común en el idioma de la página si iNaturalist lo da. Si no, el
+// científico (en cursiva), nunca un nombre en otro idioma.
+function nombreComun(f) {
+  const n = f.nombre;
+  if (!n || n === f.cientifico) return null;
+  if (idiomaActual() !== 'en' && n === f.nombreEn) return null; // iNaturalist devolvió el inglés
+  return n;
+}
+
+// La franja sale cuando los puntos ya están: sin ellos, las clases no tendrían nombre todavía.
+function datosPaisaje() {
+  if (!S.paisaje || !S.obsListas) return null;
+  const fila = (id) => { const f = S.porId.get(id); return f && { nombre: nombreComun(f), cientifico: f.cientifico }; };
+  const franja = franjaPaisaje(S.perfil, S.paisaje, S.obs, fila);
+  if (!franja?.tramos.length) return null;
+  return {
+    titulo: t('paisaje_titulo'), tramos: franja.tramos,
+    leyenda: unirLeyenda(franja.leyenda.map((l) => ({
+      clase: l.clase, texto: l.nombre || l.cientifico || t('paisaje_sin_planta'), cursiva: !l.nombre && !!l.cientifico,
+    }))),
+  };
+}
+
+// Vectores de AlphaEarth del perfil. Si fallan o no cubren la ruta, el cuadro sigue como siempre.
+async function cargarPaisaje() {
+  const ruta = S.ruta, perfil = S.perfil;
+  if (!perfil.length || S.paisajeDe === ruta) return;
+  S.paisajeDe = ruta;
+  try {
+    const vectores = await vectoresAef(perfil);
+    if (S.ruta !== ruta || S.perfil !== perfil) return;
+    S.paisaje = clasesDelPerfil(vectores);
+    if (S.paisaje) pintarCuadroActual();
+  } catch { /* sin paisaje */ }
 }
 
 async function crearPlancha() {
@@ -133,6 +185,7 @@ async function crearPlancha() {
   ponerPuntosEnLamina();
   pintarCuadroActual();
   pintarCarga();
+  cargarPaisaje();
 }
 
 function ponerPuntosEnLamina() {
@@ -268,7 +321,7 @@ function vaciar() {
 }
 
 export function abrirRuta(ruta) {
-  Object.assign(S, { ruta, perfil: [], resumen: null, filas: [], porId: new Map(), obs: [], completa: false, obsListas: false, fallo: false });
+  Object.assign(S, { ruta, perfil: [], resumen: null, filas: [], porId: new Map(), obs: [], completa: false, obsListas: false, fallo: false, paisaje: null, paisajeDe: null });
   S.tramos = tramosDeRuta(ruta.puntos);
   // Cada punto marca su celda y las vecinas: el pasillo mide al menos un paso a cada lado.
   S.pasilloM = Math.floor((S.tramos.paso * 111000 * Math.cos((ruta.puntos[0].lat * Math.PI) / 180)) / 50) * 50;

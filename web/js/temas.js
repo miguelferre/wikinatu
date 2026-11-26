@@ -28,7 +28,7 @@ export function pinturaLamina({ papel = false } = {}) {
 
 export function pinturaCuadro() {
   const v = (k) => token(`cua-${k}`);
-  return { bandas: lista('cua-bandas'), tinta: v('tinta'), suave: v('suave'), anillo: v('anillo'), curva: v('curva') };
+  return { bandas: lista('cua-bandas'), paisaje: lista('cua-paisaje'), tinta: v('tinta'), suave: v('suave'), anillo: v('anillo'), curva: v('curva') };
 }
 
 export function pinturaHeroe() {
